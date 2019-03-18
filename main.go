@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"path"
 	"text/template"
 )
