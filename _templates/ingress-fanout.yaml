@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+       nginx.ingress.kubernetes.io/rewrite-target: /
+       kubernetes.io/ingress.class: {{application-name--ingress}}
+  name: {{application-name-ingress}}
+spec:
+  rules:
+  - host: {{host-api-fqdn}}
+    http:
+      paths:
+      - backend:
+          serviceName: {{service-name-A}}
+          servicePort: {{service-port-A}}
+        path: {{service-path-A}}
+  - host: {{host-storage-fqdn}}
+    http:
+      paths:
+      - backend:
+          serviceName: {{service-name-B}}
+          servicePort: {{service-port-B}}
+        path: {{service-path-B}}

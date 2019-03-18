@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: {{component-name}}
+    app: {{application-name}}
+    release: {{release-name-or-version}}
+    tier: {{tier}}
+  name: {{component-name-svc}}
+spec:
+  ports:
+  - name: {{optional-name}}
+    port: {{port}}
+    protocol: TCP
+    targetPort: {{target-port}}
+  - name: {{optional-name}}
+    port: {{port}}
+    protocol: TCP
+    targetPort: {{target-port}}
+  selector:
+    app: {{application-name}}
+    component: {{component-name}}
+  type: [[ExternalName,ClusterIP,LoadBalancer]]
