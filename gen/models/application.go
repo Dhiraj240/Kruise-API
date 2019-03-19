@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,14 +19,21 @@ import (
 // swagger:model application
 type Application struct {
 
-	// name
+	// The name of the application
 	// Required: true
 	// Min Length: 1
 	Name *string `json:"name"`
 
-	// tenant
+	// The environment to deploy to
+	// Required: true
 	// Min Length: 1
-	Tenant string `json:"tenant,omitempty"`
+	// Enum: [Dev Stage Prod]
+	TargetEnvironment *string `json:"targetEnvironment"`
+
+	// The name of the tenant
+	// Required: true
+	// Min Length: 1
+	Tenant *string `json:"tenant"`
 }
 
 // Validate validates this application
@@ -32,6 +41,10 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTargetEnvironment(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,13 +71,63 @@ func (m *Application) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Application) validateTenant(formats strfmt.Registry) error {
+var applicationTypeTargetEnvironmentPropEnum []interface{}
 
-	if swag.IsZero(m.Tenant) { // not required
-		return nil
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["Dev","Stage","Prod"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		applicationTypeTargetEnvironmentPropEnum = append(applicationTypeTargetEnvironmentPropEnum, v)
+	}
+}
+
+const (
+
+	// ApplicationTargetEnvironmentDev captures enum value "Dev"
+	ApplicationTargetEnvironmentDev string = "Dev"
+
+	// ApplicationTargetEnvironmentStage captures enum value "Stage"
+	ApplicationTargetEnvironmentStage string = "Stage"
+
+	// ApplicationTargetEnvironmentProd captures enum value "Prod"
+	ApplicationTargetEnvironmentProd string = "Prod"
+)
+
+// prop value enum
+func (m *Application) validateTargetEnvironmentEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, applicationTypeTargetEnvironmentPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Application) validateTargetEnvironment(formats strfmt.Registry) error {
+
+	if err := validate.Required("targetEnvironment", "body", m.TargetEnvironment); err != nil {
+		return err
 	}
 
-	if err := validate.MinLength("tenant", "body", string(m.Tenant), 1); err != nil {
+	if err := validate.MinLength("targetEnvironment", "body", string(*m.TargetEnvironment), 1); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateTargetEnvironmentEnum("targetEnvironment", "body", *m.TargetEnvironment); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Application) validateTenant(formats strfmt.Registry) error {
+
+	if err := validate.Required("tenant", "body", m.Tenant); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("tenant", "body", string(*m.Tenant), 1); err != nil {
 		return err
 	}
 

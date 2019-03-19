@@ -65,12 +65,25 @@ definitions:
     properties:
       name:
         type: string
+        description: The name of the application
         minLength: 1
       tenant:
         type: string
+        description: The name of the tenant
         minLength: 1
+      targetEnvironment:
+        type: string
+        description: The environment to deploy to
+        minLength: 1
+        # TODO: consider making environments configurable
+        enum:
+        - Dev
+        - Stage
+        - Prod
     required:
     - name
+    - tenant
+    - targetEnvironment
 
   healthStatus:
     type: object

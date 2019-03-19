@@ -44,8 +44,9 @@ func main() {
 			}
 
 			return deployments.NewCreateDeploymentCreated().WithPayload(&models.Application{
-				Name:   params.Application.Name,
-				Tenant: params.Application.Tenant,
+				Name:              params.Application.Name,
+				Tenant:            params.Application.Tenant,
+				TargetEnvironment: params.Application.TargetEnvironment,
 			})
 		})
 

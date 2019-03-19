@@ -1,4 +1,5 @@
 {
   "name": "molly-data",
-  "tenant": "molly"
+  "tenant": "molly",
+  "targetEnvironment": "Dev"
 }

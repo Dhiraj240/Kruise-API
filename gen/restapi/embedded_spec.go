@@ -93,14 +93,28 @@ func init() {
     "application": {
       "type": "object",
       "required": [
-        "name"
+        "name",
+        "tenant",
+        "targetEnvironment"
       ],
       "properties": {
         "name": {
+          "description": "The name of the application",
           "type": "string",
           "minLength": 1
         },
+        "targetEnvironment": {
+          "description": "The environment to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "Dev",
+            "Stage",
+            "Prod"
+          ]
+        },
         "tenant": {
+          "description": "The name of the tenant",
           "type": "string",
           "minLength": 1
         }
@@ -227,14 +241,28 @@ func init() {
     "application": {
       "type": "object",
       "required": [
-        "name"
+        "name",
+        "tenant",
+        "targetEnvironment"
       ],
       "properties": {
         "name": {
+          "description": "The name of the application",
           "type": "string",
           "minLength": 1
         },
+        "targetEnvironment": {
+          "description": "The environment to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "Dev",
+            "Stage",
+            "Prod"
+          ]
+        },
         "tenant": {
+          "description": "The name of the tenant",
           "type": "string",
           "minLength": 1
         }
