@@ -1,0 +1,44 @@
+swagger: "2.0"
+
+info:
+  description: Kruise deployment wizard
+  title: Kruise deployment wizard
+  version: 0.0.1
+
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+paths:
+  /health:
+    get:
+      tags:
+      - general
+      operationId: getHealth
+      description: Get the current health of the API
+      responses:
+        200:
+          description: Get current health response
+          schema:
+            $ref: "#/definitions/healthStatus"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/error"
+definitions:
+  healthStatus:
+    type: object
+    properties:
+      status:
+        type: string
+  error:
+    type: object
+    required:
+    - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
