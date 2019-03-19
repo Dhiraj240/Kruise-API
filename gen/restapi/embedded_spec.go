@@ -95,15 +95,14 @@ func init() {
       "required": [
         "name",
         "tenant",
-        "targetEnvironment"
+        "environment",
+        "namespace",
+        "repoURL",
+        "path",
+        "targetRevision"
       ],
       "properties": {
-        "name": {
-          "description": "The name of the application",
-          "type": "string",
-          "minLength": 1
-        },
-        "targetEnvironment": {
+        "environment": {
           "description": "The environment to deploy to",
           "type": "string",
           "minLength": 1,
@@ -112,6 +111,43 @@ func init() {
             "Stage",
             "Prod"
           ]
+        },
+        "name": {
+          "description": "The name of the application",
+          "type": "string",
+          "minLength": 1
+        },
+        "namespace": {
+          "description": "The namespace to deploy to",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "description": "The relative path to the manifests in the git repo",
+          "type": "string",
+          "format": "filepath",
+          "minLength": 1
+        },
+        "region": {
+          "description": "The region to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "STL",
+            "KCI",
+            "BEL"
+          ]
+        },
+        "repoURL": {
+          "description": "The git repo URL",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "targetRevision": {
+          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+          "type": "string",
+          "minLength": 1
         },
         "tenant": {
           "description": "The name of the tenant",
@@ -243,15 +279,14 @@ func init() {
       "required": [
         "name",
         "tenant",
-        "targetEnvironment"
+        "environment",
+        "namespace",
+        "repoURL",
+        "path",
+        "targetRevision"
       ],
       "properties": {
-        "name": {
-          "description": "The name of the application",
-          "type": "string",
-          "minLength": 1
-        },
-        "targetEnvironment": {
+        "environment": {
           "description": "The environment to deploy to",
           "type": "string",
           "minLength": 1,
@@ -260,6 +295,43 @@ func init() {
             "Stage",
             "Prod"
           ]
+        },
+        "name": {
+          "description": "The name of the application",
+          "type": "string",
+          "minLength": 1
+        },
+        "namespace": {
+          "description": "The namespace to deploy to",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "description": "The relative path to the manifests in the git repo",
+          "type": "string",
+          "format": "filepath",
+          "minLength": 1
+        },
+        "region": {
+          "description": "The region to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "STL",
+            "KCI",
+            "BEL"
+          ]
+        },
+        "repoURL": {
+          "description": "The git repo URL",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "targetRevision": {
+          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+          "type": "string",
+          "minLength": 1
         },
         "tenant": {
           "description": "The name of the tenant",

@@ -71,7 +71,7 @@ definitions:
         type: string
         description: The name of the tenant
         minLength: 1
-      targetEnvironment:
+      environment:
         type: string
         description: The environment to deploy to
         minLength: 1
@@ -80,10 +80,41 @@ definitions:
         - Dev
         - Stage
         - Prod
+      region:
+        type: string
+        description: The region to deploy to
+        minLength: 1
+        # TODO: consider making regions configurable
+        enum:
+        - STL
+        - KCI
+        - BEL
+      namespace:
+        type: string
+        description: The namespace to deploy to
+        minLength: 1
+      repoURL:
+        type: string
+        description: The git repo URL
+        minLength: 1
+        format: uri
+      path:
+        type: string
+        description: The relative path to the manifests in the git repo
+        minLength: 1
+        format: filepath
+      targetRevision:
+        type: string
+        description: Defines the commit, tag, or branch in which to sync the application to.
+        minLength: 1
     required:
     - name
     - tenant
-    - targetEnvironment
+    - environment
+    - namespace
+    - repoURL
+    - path
+    - targetRevision
 
   healthStatus:
     type: object
