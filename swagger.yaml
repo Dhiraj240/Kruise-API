@@ -1,3 +1,9 @@
+# TODO: update property descriptions based on destination counterparts
+# (kubernetes, argocd resources)
+
+# TODO: formats for validating kubernetes names (service, deployment, etc.).
+# DNS_LABEL, IANA_SVC_NAME
+
 swagger: "2.0"
 
 info:
@@ -6,11 +12,13 @@ info:
   version: 0.0.1
 
 consumes:
-  - "application/json"
+- "application/json"
+
 produces:
-  - "application/json"
+- "application/json"
 
 paths:
+
   /deployment:
     post:
       tags:
@@ -33,6 +41,7 @@ paths:
           $ref: "#/responses/BadRequest"
         default:
           $ref: "#/responses/InternalServerError"
+
   /health:
     get:
       tags:
@@ -50,16 +59,19 @@ paths:
             $ref: "#/definitions/error"
 
 responses:
+
   BadRequest:
     description: Bad request
     schema:
       type: string
+
   InternalServerError:
     description: Internal server error
     schema:
       type: string
 
 definitions:
+
   application:
     type: object
     properties:
@@ -107,6 +119,14 @@ definitions:
         type: string
         description: Defines the commit, tag, or branch in which to sync the application to.
         minLength: 1
+      services:
+        type: array
+        items:
+          $ref: "#/definitions/service"
+      ingresses:
+        type: array
+        items:
+          $ref: "#/definitions/ingress"
     required:
     - name
     - tenant
@@ -115,12 +135,104 @@ definitions:
     - repoURL
     - path
     - targetRevision
+    - services
+    - ingresses
+
+  service:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the service
+        minLength: 1
+      tier:
+        type: string
+        description: The tier for the service
+        minLength: 1
+        # TODO: needs to be configurable
+        enum:
+        - Frontend
+        - API
+        - Backend
+        - Cache
+      servicePorts:
+        type: array
+        items:
+          $ref: "#/definitions/servicePort"
+    required:
+    - name
+    - tier
+    - servicePorts
+
+  servicePort:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of this port within the service
+        minLength: 1
+      port:
+        type: integer
+        description: The port that will be exposed by this service
+      protocol:
+        type: string
+        description: The IP protocol for this port. Supports "TCP" and "UDP". Default is TCP
+        default: TCP
+        enum:
+        - TCP
+        - UDP
+      targetPort:
+        type: string
+        description: Number or name of the port to access on the pods targeted by the service
+        minLength: 1
+    required:
+    - name
+    - port
+
+  ingress:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the ingress
+        minLength: 1
+      rules:
+        type: array
+        items:
+          $ref: "#/definitions/ingressRule"
+    required:
+    - name
+    - rules
+
+  ingressRule:
+    type: object
+    properties:
+      host:
+        type: string
+        description: Host is the fully qualified domain name of a network host, as defined by RFC 3986
+        minLength: 1
+      path:
+        type: string
+        description: Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request
+      serviceName:
+        type: string
+        description: Specifies the name of the referenced service
+        minLength: 1
+      servicePort:
+        type: string
+        description: Specifies the port of the referenced service
+        minLength: 1
+    required:
+    - host
+    - serviceName
+    - servicePort
 
   healthStatus:
     type: object
     properties:
       status:
         type: string
+
   error:
     type: object
     required:

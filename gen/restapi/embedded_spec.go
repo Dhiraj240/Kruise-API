@@ -99,7 +99,9 @@ func init() {
         "namespace",
         "repoURL",
         "path",
-        "targetRevision"
+        "targetRevision",
+        "services",
+        "ingresses"
       ],
       "properties": {
         "environment": {
@@ -111,6 +113,12 @@ func init() {
             "Stage",
             "Prod"
           ]
+        },
+        "ingresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingress"
+          }
         },
         "name": {
           "description": "The name of the application",
@@ -144,6 +152,12 @@ func init() {
           "format": "uri",
           "minLength": 1
         },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/service"
+          }
+        },
         "targetRevision": {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
@@ -176,6 +190,119 @@ func init() {
       "properties": {
         "status": {
           "type": "string"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "required": [
+        "name",
+        "rules"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the ingress",
+          "type": "string",
+          "minLength": 1
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingressRule"
+          }
+        }
+      }
+    },
+    "ingressRule": {
+      "type": "object",
+      "required": [
+        "host",
+        "serviceName",
+        "servicePort"
+      ],
+      "properties": {
+        "host": {
+          "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
+          "type": "string"
+        },
+        "serviceName": {
+          "description": "Specifies the name of the referenced service",
+          "type": "string",
+          "minLength": 1
+        },
+        "servicePort": {
+          "description": "Specifies the port of the referenced service",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "required": [
+        "name",
+        "tier",
+        "servicePorts"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the service",
+          "type": "string",
+          "minLength": 1
+        },
+        "servicePorts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/servicePort"
+          }
+        },
+        "tier": {
+          "description": "The tier for the service",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "Frontend",
+            "API",
+            "Backend",
+            "Cache"
+          ]
+        }
+      }
+    },
+    "servicePort": {
+      "type": "object",
+      "required": [
+        "name",
+        "port"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of this port within the service",
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "description": "The port that will be exposed by this service",
+          "type": "integer"
+        },
+        "protocol": {
+          "description": "The IP protocol for this port. Supports \"TCP\" and \"UDP\". Default is TCP",
+          "type": "string",
+          "default": "TCP",
+          "enum": [
+            "TCP",
+            "UDP"
+          ]
+        },
+        "targetPort": {
+          "description": "Number or name of the port to access on the pods targeted by the service",
+          "type": "string",
+          "minLength": 1
         }
       }
     }
@@ -283,7 +410,9 @@ func init() {
         "namespace",
         "repoURL",
         "path",
-        "targetRevision"
+        "targetRevision",
+        "services",
+        "ingresses"
       ],
       "properties": {
         "environment": {
@@ -295,6 +424,12 @@ func init() {
             "Stage",
             "Prod"
           ]
+        },
+        "ingresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingress"
+          }
         },
         "name": {
           "description": "The name of the application",
@@ -328,6 +463,12 @@ func init() {
           "format": "uri",
           "minLength": 1
         },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/service"
+          }
+        },
         "targetRevision": {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
@@ -360,6 +501,119 @@ func init() {
       "properties": {
         "status": {
           "type": "string"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "required": [
+        "name",
+        "rules"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the ingress",
+          "type": "string",
+          "minLength": 1
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingressRule"
+          }
+        }
+      }
+    },
+    "ingressRule": {
+      "type": "object",
+      "required": [
+        "host",
+        "serviceName",
+        "servicePort"
+      ],
+      "properties": {
+        "host": {
+          "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
+          "type": "string"
+        },
+        "serviceName": {
+          "description": "Specifies the name of the referenced service",
+          "type": "string",
+          "minLength": 1
+        },
+        "servicePort": {
+          "description": "Specifies the port of the referenced service",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "required": [
+        "name",
+        "tier",
+        "servicePorts"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the service",
+          "type": "string",
+          "minLength": 1
+        },
+        "servicePorts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/servicePort"
+          }
+        },
+        "tier": {
+          "description": "The tier for the service",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "Frontend",
+            "API",
+            "Backend",
+            "Cache"
+          ]
+        }
+      }
+    },
+    "servicePort": {
+      "type": "object",
+      "required": [
+        "name",
+        "port"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of this port within the service",
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "description": "The port that will be exposed by this service",
+          "type": "integer"
+        },
+        "protocol": {
+          "description": "The IP protocol for this port. Supports \"TCP\" and \"UDP\". Default is TCP",
+          "type": "string",
+          "default": "TCP",
+          "enum": [
+            "TCP",
+            "UDP"
+          ]
+        },
+        "targetPort": {
+          "description": "Number or name of the port to access on the pods targeted by the service",
+          "type": "string",
+          "minLength": 1
         }
       }
     }

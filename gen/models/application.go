@@ -7,6 +7,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -24,6 +25,10 @@ type Application struct {
 	// Min Length: 1
 	// Enum: [Dev Stage Prod]
 	Environment *string `json:"environment"`
+
+	// ingresses
+	// Required: true
+	Ingresses []*Ingress `json:"ingresses"`
 
 	// The name of the application
 	// Required: true
@@ -51,6 +56,10 @@ type Application struct {
 	// Format: uri
 	RepoURL *strfmt.URI `json:"repoURL"`
 
+	// services
+	// Required: true
+	Services []*Service `json:"services"`
+
 	// Defines the commit, tag, or branch in which to sync the application to.
 	// Required: true
 	// Min Length: 1
@@ -67,6 +76,10 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironment(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIngresses(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,6 +100,10 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRepoURL(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateServices(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -149,6 +166,31 @@ func (m *Application) validateEnvironment(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateEnvironmentEnum("environment", "body", *m.Environment); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Application) validateIngresses(formats strfmt.Registry) error {
+
+	if err := validate.Required("ingresses", "body", m.Ingresses); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Ingresses); i++ {
+		if swag.IsZero(m.Ingresses[i]) { // not required
+			continue
+		}
+
+		if m.Ingresses[i] != nil {
+			if err := m.Ingresses[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("ingresses" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -255,6 +297,31 @@ func (m *Application) validateRepoURL(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("repoURL", "body", "uri", m.RepoURL.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Application) validateServices(formats strfmt.Registry) error {
+
+	if err := validate.Required("services", "body", m.Services); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Services); i++ {
+		if swag.IsZero(m.Services[i]) { // not required
+			continue
+		}
+
+		if m.Services[i] != nil {
+			if err := m.Services[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("services" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
