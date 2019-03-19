@@ -31,6 +31,40 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
+    "/deployment": {
+      "post": {
+        "description": "Generates a new Kruise deployment",
+        "tags": [
+          "deployments"
+        ],
+        "operationId": "createDeployment",
+        "parameters": [
+          {
+            "description": "The application to create",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "default": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "description": "Get the current health of the API",
@@ -56,6 +90,22 @@ func init() {
     }
   },
   "definitions": {
+    "application": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -77,6 +127,20 @@ func init() {
         "status": {
           "type": "string"
         }
+      }
+    }
+  },
+  "responses": {
+    "BadRequest": {
+      "description": "Bad request",
+      "schema": {
+        "type": "string"
+      }
+    },
+    "InternalServerError": {
+      "description": "Internal server error",
+      "schema": {
+        "type": "string"
       }
     }
   }
@@ -95,6 +159,46 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
+    "/deployment": {
+      "post": {
+        "description": "Generates a new Kruise deployment",
+        "tags": [
+          "deployments"
+        ],
+        "operationId": "createDeployment",
+        "parameters": [
+          {
+            "description": "The application to create",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "description": "Get the current health of the API",
@@ -120,6 +224,22 @@ func init() {
     }
   },
   "definitions": {
+    "application": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -141,6 +261,20 @@ func init() {
         "status": {
           "type": "string"
         }
+      }
+    }
+  },
+  "responses": {
+    "BadRequest": {
+      "description": "Bad request",
+      "schema": {
+        "type": "string"
+      }
+    },
+    "InternalServerError": {
+      "description": "Internal server error",
+      "schema": {
+        "type": "string"
       }
     }
   }

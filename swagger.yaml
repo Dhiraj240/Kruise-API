@@ -11,6 +11,28 @@ produces:
   - "application/json"
 
 paths:
+  /deployment:
+    post:
+      tags:
+      - deployments
+      operationId: createDeployment
+      description: Generates a new Kruise deployment
+      parameters:
+      - name: application
+        in: body
+        description: The application to create
+        required: true
+        schema:
+          $ref: "#/definitions/application"
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: "#/definitions/application"
+        400:
+          $ref: "#/responses/BadRequest"
+        default:
+          $ref: "#/responses/InternalServerError"
   /health:
     get:
       tags:
@@ -26,7 +48,30 @@ paths:
           description: Error response
           schema:
             $ref: "#/definitions/error"
+
+responses:
+  BadRequest:
+    description: Bad request
+    schema:
+      type: string
+  InternalServerError:
+    description: Internal server error
+    schema:
+      type: string
+
 definitions:
+  application:
+    type: object
+    properties:
+      name:
+        type: string
+        minLength: 1
+      tenant:
+        type: string
+        minLength: 1
+    required:
+    - name
+
   healthStatus:
     type: object
     properties:

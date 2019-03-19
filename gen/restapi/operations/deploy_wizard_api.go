@@ -19,6 +19,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"deploy-wizard/gen/restapi/operations/deployments"
 	"deploy-wizard/gen/restapi/operations/general"
 )
 
@@ -39,6 +40,9 @@ func NewDeployWizardAPI(spec *loads.Document) *DeployWizardAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		DeploymentsCreateDeploymentHandler: deployments.CreateDeploymentHandlerFunc(func(params deployments.CreateDeploymentParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeploymentsCreateDeployment has not yet been implemented")
+		}),
 		GeneralGetHealthHandler: general.GetHealthHandlerFunc(func(params general.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation GeneralGetHealth has not yet been implemented")
 		}),
@@ -73,6 +77,8 @@ type DeployWizardAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// DeploymentsCreateDeploymentHandler sets the operation handler for the create deployment operation
+	DeploymentsCreateDeploymentHandler deployments.CreateDeploymentHandler
 	// GeneralGetHealthHandler sets the operation handler for the get health operation
 	GeneralGetHealthHandler general.GetHealthHandler
 
@@ -136,6 +142,10 @@ func (o *DeployWizardAPI) Validate() error {
 
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.DeploymentsCreateDeploymentHandler == nil {
+		unregistered = append(unregistered, "deployments.CreateDeploymentHandler")
 	}
 
 	if o.GeneralGetHealthHandler == nil {
@@ -239,6 +249,11 @@ func (o *DeployWizardAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/deployment"] = deployments.NewCreateDeployment(o.context, o.DeploymentsCreateDeploymentHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

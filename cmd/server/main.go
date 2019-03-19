@@ -6,6 +6,7 @@ import (
 	"deploy-wizard/gen/models"
 	"deploy-wizard/gen/restapi"
 	"deploy-wizard/gen/restapi/operations"
+	"deploy-wizard/gen/restapi/operations/deployments"
 	"deploy-wizard/gen/restapi/operations/general"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -34,6 +35,18 @@ func main() {
 	api.GeneralGetHealthHandler = general.GetHealthHandlerFunc(
 		func(params general.GetHealthParams) middleware.Responder {
 			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{"OK"})
+		})
+
+	api.DeploymentsCreateDeploymentHandler = deployments.CreateDeploymentHandlerFunc(
+		func(params deployments.CreateDeploymentParams) middleware.Responder {
+			if params.Application == nil {
+				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
+			}
+
+			return deployments.NewCreateDeploymentCreated().WithPayload(&models.Application{
+				Name:   params.Application.Name,
+				Tenant: params.Application.Tenant,
+			})
 		})
 
 	if err := server.Serve(); err != nil {
