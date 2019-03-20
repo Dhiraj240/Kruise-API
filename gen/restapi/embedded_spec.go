@@ -96,17 +96,15 @@ func init() {
         "name",
         "tenant",
         "environment",
+        "region",
         "namespace",
-        "repoURL",
-        "path",
-        "targetRevision",
-        "services",
-        "ingresses"
+        "repoURL"
       ],
       "properties": {
         "environment": {
           "description": "The environment to deploy to",
           "type": "string",
+          "default": "Dev",
           "minLength": 1,
           "enum": [
             "Dev",
@@ -134,11 +132,13 @@ func init() {
           "description": "The relative path to the manifests in the git repo",
           "type": "string",
           "format": "filepath",
+          "default": "/",
           "minLength": 1
         },
         "region": {
           "description": "The region to deploy to",
           "type": "string",
+          "default": "STL",
           "minLength": 1,
           "enum": [
             "STL",
@@ -161,6 +161,7 @@ func init() {
         "targetRevision": {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
+          "default": "HEAD",
           "minLength": 1
         },
         "tenant": {
@@ -407,17 +408,15 @@ func init() {
         "name",
         "tenant",
         "environment",
+        "region",
         "namespace",
-        "repoURL",
-        "path",
-        "targetRevision",
-        "services",
-        "ingresses"
+        "repoURL"
       ],
       "properties": {
         "environment": {
           "description": "The environment to deploy to",
           "type": "string",
+          "default": "Dev",
           "minLength": 1,
           "enum": [
             "Dev",
@@ -445,11 +444,13 @@ func init() {
           "description": "The relative path to the manifests in the git repo",
           "type": "string",
           "format": "filepath",
+          "default": "/",
           "minLength": 1
         },
         "region": {
           "description": "The region to deploy to",
           "type": "string",
+          "default": "STL",
           "minLength": 1,
           "enum": [
             "STL",
@@ -472,6 +473,7 @@ func init() {
         "targetRevision": {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
+          "default": "HEAD",
           "minLength": 1
         },
         "tenant": {

@@ -43,11 +43,7 @@ func main() {
 				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
 			}
 
-			return deployments.NewCreateDeploymentCreated().WithPayload(&models.Application{
-				Name:              params.Application.Name,
-				Tenant:            params.Application.Tenant,
-				TargetEnvironment: params.Application.TargetEnvironment,
-			})
+			return deployments.NewCreateDeploymentCreated().WithPayload(params.Application)
 		})
 
 	if err := server.Serve(); err != nil {

@@ -1,5 +1,10 @@
 {
   "name": "molly-data",
   "tenant": "molly",
-  "targetEnvironment": "Dev"
+  "environment": "Dev",
+  "region": "STL",
+  "namespace": "molly",
+  "repoURL": "https://github.com/ryane/test",
+  "path": "/app",
+  "targetRevision": "HEAD"
 }

@@ -88,6 +88,7 @@ definitions:
         description: The environment to deploy to
         minLength: 1
         # TODO: consider making environments configurable
+        default: Dev
         enum:
         - Dev
         - Stage
@@ -97,6 +98,7 @@ definitions:
         description: The region to deploy to
         minLength: 1
         # TODO: consider making regions configurable
+        default: STL
         enum:
         - STL
         - KCI
@@ -115,10 +117,12 @@ definitions:
         description: The relative path to the manifests in the git repo
         minLength: 1
         format: filepath
+        default: "/"
       targetRevision:
         type: string
         description: Defines the commit, tag, or branch in which to sync the application to.
         minLength: 1
+        default: HEAD
       services:
         type: array
         items:
@@ -131,12 +135,9 @@ definitions:
     - name
     - tenant
     - environment
+    - region
     - namespace
     - repoURL
-    - path
-    - targetRevision
-    - services
-    - ingresses
 
   service:
     type: object
