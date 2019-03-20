@@ -8,6 +8,7 @@ import (
 	"deploy-wizard/gen/restapi/operations"
 	"deploy-wizard/gen/restapi/operations/deployments"
 	"deploy-wizard/gen/restapi/operations/general"
+	"deploy-wizard/pkg/application"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
@@ -52,15 +53,7 @@ func main() {
 				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
 			}
 
-			// apply defaults TODO: middleware
-			if params.Application.TargetRevision == "" {
-				params.Application.TargetRevision = defaultApplicationTargetRevision
-			}
-			if params.Application.Path == "" {
-				params.Application.Path = defaultApplicationPath
-			}
-
-			return deployments.NewCreateDeploymentCreated().WithPayload(params.Application)
+			return deployments.NewCreateDeploymentCreated().WithPayload(application.ApplyDefaults(params.Application))
 		})
 
 	server.ConfigureAPI()
