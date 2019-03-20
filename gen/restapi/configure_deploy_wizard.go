@@ -6,12 +6,13 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	interpose "github.com/carbocation/interpose/adaptors"
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
-	middleware "github.com/go-openapi/runtime/middleware"
+	"github.com/meatballhat/negroni-logrus"
+	log "github.com/sirupsen/logrus"
 
 	"deploy-wizard/gen/restapi/operations"
-	"deploy-wizard/gen/restapi/operations/general"
 )
 
 //go:generate swagger generate server --target ../../gen --name DeployWizard --spec ../../swagger.yaml --exclude-main
@@ -33,10 +34,6 @@ func configureAPI(api *operations.DeployWizardAPI) http.Handler {
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
-
-	api.GeneralGetHealthHandler = general.GetHealthHandlerFunc(func(params general.GetHealthParams) middleware.Responder {
-		return middleware.NotImplemented("operation general.GetHealth has not yet been implemented")
-	})
 
 	api.ServerShutdown = func() {}
 
@@ -64,5 +61,9 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
-	return handler
+	logViaLogrus := interpose.FromNegroni(negronilogrus.NewCustomMiddleware(log.InfoLevel, &log.JSONFormatter{}, "api"))
+
+	return logViaLogrus(
+		handler,
+	)
 }

@@ -19,14 +19,18 @@ const (
 )
 
 func main() {
+	log.SetFormatter(&log.JSONFormatter{})
+
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
 
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	api := operations.NewDeployWizardAPI(swaggerSpec)
+	api.Logger = log.Infof
+
 	server := restapi.NewServer(api)
 	defer func() {
 		_ = server.Shutdown()
@@ -58,6 +62,8 @@ func main() {
 
 			return deployments.NewCreateDeploymentCreated().WithPayload(params.Application)
 		})
+
+	server.ConfigureAPI()
 
 	if err := server.Serve(); err != nil {
 		log.Fatal(err)
