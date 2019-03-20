@@ -13,6 +13,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	defaultApplicationTargetRevision = "HEAD"
+	defaultApplicationPath           = "/"
+)
+
 func main() {
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
 
@@ -41,6 +46,14 @@ func main() {
 		func(params deployments.CreateDeploymentParams) middleware.Responder {
 			if params.Application == nil {
 				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
+			}
+
+			// apply defaults TODO: middleware
+			if params.Application.TargetRevision == "" {
+				params.Application.TargetRevision = defaultApplicationTargetRevision
+			}
+			if params.Application.Path == "" {
+				params.Application.Path = defaultApplicationPath
 			}
 
 			return deployments.NewCreateDeploymentCreated().WithPayload(params.Application)
