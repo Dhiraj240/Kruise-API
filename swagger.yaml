@@ -79,6 +79,10 @@ definitions:
         type: string
         description: The name of the application
         minLength: 1
+      release:
+        type: string
+        description: The version or release name of the application
+        minLength: 1
       tenant:
         type: string
         description: The name of the tenant
@@ -133,6 +137,7 @@ definitions:
           $ref: "#/definitions/ingress"
     required:
     - name
+    - release
     - tenant
     - environment
     - region

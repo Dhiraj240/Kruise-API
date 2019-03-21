@@ -94,6 +94,7 @@ func init() {
       "type": "object",
       "required": [
         "name",
+        "release",
         "tenant",
         "environment",
         "region",
@@ -145,6 +146,11 @@ func init() {
             "KCI",
             "BEL"
           ]
+        },
+        "release": {
+          "description": "The version or release name of the application",
+          "type": "string",
+          "minLength": 1
         },
         "repoURL": {
           "description": "The git repo URL",
@@ -406,6 +412,7 @@ func init() {
       "type": "object",
       "required": [
         "name",
+        "release",
         "tenant",
         "environment",
         "region",
@@ -457,6 +464,11 @@ func init() {
             "KCI",
             "BEL"
           ]
+        },
+        "release": {
+          "description": "The version or release name of the application",
+          "type": "string",
+          "minLength": 1
         },
         "repoURL": {
           "description": "The git repo URL",

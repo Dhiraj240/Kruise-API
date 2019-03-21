@@ -49,6 +49,11 @@ type Application struct {
 	// Enum: [STL KCI BEL]
 	Region *string `json:"region"`
 
+	// The version or release name of the application
+	// Required: true
+	// Min Length: 1
+	Release *string `json:"release"`
+
 	// The git repo URL
 	// Required: true
 	// Min Length: 1
@@ -93,6 +98,10 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegion(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRelease(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -276,6 +285,19 @@ func (m *Application) validateRegion(formats strfmt.Registry) error {
 
 	// value enum
 	if err := m.validateRegionEnum("region", "body", *m.Region); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Application) validateRelease(formats strfmt.Registry) error {
+
+	if err := validate.Required("release", "body", m.Release); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("release", "body", string(*m.Release), 1); err != nil {
 		return err
 	}
 
