@@ -22,15 +22,16 @@ type ServicePort struct {
 	// The name of this port within the service
 	// Required: true
 	// Min Length: 1
-	Name *string `json:"name"`
+	Name string `json:"name"`
 
 	// The port that will be exposed by this service
 	// Required: true
-	Port *int64 `json:"port"`
+	Port int64 `json:"port"`
 
 	// The IP protocol for this port. Supports "TCP" and "UDP". Default is TCP
+	// Min Length: 1
 	// Enum: [TCP UDP]
-	Protocol *string `json:"protocol,omitempty"`
+	Protocol string `json:"protocol,omitempty"`
 
 	// Number or name of the port to access on the pods targeted by the service
 	// Min Length: 1
@@ -65,11 +66,11 @@ func (m *ServicePort) Validate(formats strfmt.Registry) error {
 
 func (m *ServicePort) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
 		return err
 	}
 
@@ -78,7 +79,7 @@ func (m *ServicePort) validateName(formats strfmt.Registry) error {
 
 func (m *ServicePort) validatePort(formats strfmt.Registry) error {
 
-	if err := validate.Required("port", "body", m.Port); err != nil {
+	if err := validate.Required("port", "body", int64(m.Port)); err != nil {
 		return err
 	}
 
@@ -120,8 +121,12 @@ func (m *ServicePort) validateProtocol(formats strfmt.Registry) error {
 		return nil
 	}
 
+	if err := validate.MinLength("protocol", "body", string(m.Protocol), 1); err != nil {
+		return err
+	}
+
 	// value enum
-	if err := m.validateProtocolEnum("protocol", "body", *m.Protocol); err != nil {
+	if err := m.validateProtocolEnum("protocol", "body", m.Protocol); err != nil {
 		return err
 	}
 

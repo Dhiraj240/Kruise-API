@@ -20,7 +20,7 @@ type IngressRule struct {
 	// Host is the fully qualified domain name of a network host, as defined by RFC 3986
 	// Required: true
 	// Min Length: 1
-	Host *string `json:"host"`
+	Host string `json:"host"`
 
 	// Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request
 	Path string `json:"path,omitempty"`
@@ -28,12 +28,12 @@ type IngressRule struct {
 	// Specifies the name of the referenced service
 	// Required: true
 	// Min Length: 1
-	ServiceName *string `json:"serviceName"`
+	ServiceName string `json:"serviceName"`
 
 	// Specifies the port of the referenced service
 	// Required: true
 	// Min Length: 1
-	ServicePort *string `json:"servicePort"`
+	ServicePort string `json:"servicePort"`
 }
 
 // Validate validates this ingress rule
@@ -60,11 +60,11 @@ func (m *IngressRule) Validate(formats strfmt.Registry) error {
 
 func (m *IngressRule) validateHost(formats strfmt.Registry) error {
 
-	if err := validate.Required("host", "body", m.Host); err != nil {
+	if err := validate.RequiredString("host", "body", string(m.Host)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("host", "body", string(*m.Host), 1); err != nil {
+	if err := validate.MinLength("host", "body", string(m.Host), 1); err != nil {
 		return err
 	}
 
@@ -73,11 +73,11 @@ func (m *IngressRule) validateHost(formats strfmt.Registry) error {
 
 func (m *IngressRule) validateServiceName(formats strfmt.Registry) error {
 
-	if err := validate.Required("serviceName", "body", m.ServiceName); err != nil {
+	if err := validate.RequiredString("serviceName", "body", string(m.ServiceName)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("serviceName", "body", string(*m.ServiceName), 1); err != nil {
+	if err := validate.MinLength("serviceName", "body", string(m.ServiceName), 1); err != nil {
 		return err
 	}
 
@@ -86,11 +86,11 @@ func (m *IngressRule) validateServiceName(formats strfmt.Registry) error {
 
 func (m *IngressRule) validateServicePort(formats strfmt.Registry) error {
 
-	if err := validate.Required("servicePort", "body", m.ServicePort); err != nil {
+	if err := validate.RequiredString("servicePort", "body", string(m.ServicePort)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("servicePort", "body", string(*m.ServicePort), 1); err != nil {
+	if err := validate.MinLength("servicePort", "body", string(m.ServicePort), 1); err != nil {
 		return err
 	}
 

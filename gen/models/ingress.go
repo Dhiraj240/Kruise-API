@@ -22,7 +22,7 @@ type Ingress struct {
 	// The name of the ingress
 	// Required: true
 	// Min Length: 1
-	Name *string `json:"name"`
+	Name string `json:"name"`
 
 	// rules
 	// Required: true
@@ -49,11 +49,11 @@ func (m *Ingress) Validate(formats strfmt.Registry) error {
 
 func (m *Ingress) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
 		return err
 	}
 

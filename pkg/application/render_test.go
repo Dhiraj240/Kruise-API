@@ -10,43 +10,30 @@ import (
 )
 
 var (
-	name            = "app1"
-	releaseName     = "v1"
-	tenant          = "tenant1"
-	environment     = "Dev"
-	region          = "STL"
-	namespace       = "tenant1"
-	repoURL         = strfmt.URI("https://fusion.mastercard.int/stash/scm/ce/fake-repo.git/")
-	path            = "/"
-	targetRevision  = "HEAD"
-	tier            = "Frontend"
-	httpPorts       = []int64{8080, 8000}
-	metricsPorts    = []int64{8081, 8001}
-	httpPortName    = "http"
-	metricsPortName = "metrics"
-
 	validApplication = &models.Application{
-		Name:           &name,
-		Release:        &releaseName,
-		Tenant:         &tenant,
-		Environment:    &environment,
-		Region:         &region,
-		Namespace:      &namespace,
-		RepoURL:        &repoURL,
-		Path:           path,
-		TargetRevision: targetRevision,
+		Name:           "app1",
+		Release:        "v1",
+		Tenant:         "tenant1",
+		Environment:    "Dev",
+		Region:         "STL",
+		Namespace:      "tenant1",
+		RepoURL:        strfmt.URI("https://fusion.mastercard.int/stash/scm/ce/fake-repo.git/"),
+		Path:           "/",
+		TargetRevision: "HEAD",
 		Services: []*models.Service{
 			{
-				Name: &name,
-				Tier: &tier,
+				Name: "app1",
+				Tier: "Frontend",
 				Ports: []*models.ServicePort{
 					{
-						Name: &httpPortName,
-						Port: &httpPorts[0],
+						Name: "http",
+						Port: 8080,
 					},
 					{
-						Name: &metricsPortName,
-						Port: &metricsPorts[0],
+						Name:       "metrics",
+						Port:       8081,
+						TargetPort: "8090",
+						Protocol:   "TCP",
 					},
 				},
 			},

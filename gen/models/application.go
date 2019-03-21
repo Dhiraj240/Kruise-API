@@ -24,7 +24,7 @@ type Application struct {
 	// Required: true
 	// Min Length: 1
 	// Enum: [Dev Stage Prod]
-	Environment *string `json:"environment"`
+	Environment string `json:"environment"`
 
 	// ingresses
 	Ingresses []*Ingress `json:"ingresses"`
@@ -32,12 +32,12 @@ type Application struct {
 	// The name of the application
 	// Required: true
 	// Min Length: 1
-	Name *string `json:"name"`
+	Name string `json:"name"`
 
 	// The namespace to deploy to
 	// Required: true
 	// Min Length: 1
-	Namespace *string `json:"namespace"`
+	Namespace string `json:"namespace"`
 
 	// The relative path to the manifests in the git repo
 	// Min Length: 1
@@ -47,18 +47,18 @@ type Application struct {
 	// Required: true
 	// Min Length: 1
 	// Enum: [STL KCI BEL]
-	Region *string `json:"region"`
+	Region string `json:"region"`
 
 	// The version or release name of the application
 	// Required: true
 	// Min Length: 1
-	Release *string `json:"release"`
+	Release string `json:"release"`
 
 	// The git repo URL
 	// Required: true
 	// Min Length: 1
 	// Format: uri
-	RepoURL *strfmt.URI `json:"repoURL"`
+	RepoURL strfmt.URI `json:"repoURL"`
 
 	// services
 	Services []*Service `json:"services"`
@@ -70,7 +70,7 @@ type Application struct {
 	// The name of the tenant
 	// Required: true
 	// Min Length: 1
-	Tenant *string `json:"tenant"`
+	Tenant string `json:"tenant"`
 }
 
 // Validate validates this application
@@ -161,16 +161,16 @@ func (m *Application) validateEnvironmentEnum(path, location string, value strin
 
 func (m *Application) validateEnvironment(formats strfmt.Registry) error {
 
-	if err := validate.Required("environment", "body", m.Environment); err != nil {
+	if err := validate.RequiredString("environment", "body", string(m.Environment)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("environment", "body", string(*m.Environment), 1); err != nil {
+	if err := validate.MinLength("environment", "body", string(m.Environment), 1); err != nil {
 		return err
 	}
 
 	// value enum
-	if err := m.validateEnvironmentEnum("environment", "body", *m.Environment); err != nil {
+	if err := m.validateEnvironmentEnum("environment", "body", m.Environment); err != nil {
 		return err
 	}
 
@@ -204,11 +204,11 @@ func (m *Application) validateIngresses(formats strfmt.Registry) error {
 
 func (m *Application) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
 		return err
 	}
 
@@ -217,11 +217,11 @@ func (m *Application) validateName(formats strfmt.Registry) error {
 
 func (m *Application) validateNamespace(formats strfmt.Registry) error {
 
-	if err := validate.Required("namespace", "body", m.Namespace); err != nil {
+	if err := validate.RequiredString("namespace", "body", string(m.Namespace)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("namespace", "body", string(*m.Namespace), 1); err != nil {
+	if err := validate.MinLength("namespace", "body", string(m.Namespace), 1); err != nil {
 		return err
 	}
 
@@ -275,16 +275,16 @@ func (m *Application) validateRegionEnum(path, location string, value string) er
 
 func (m *Application) validateRegion(formats strfmt.Registry) error {
 
-	if err := validate.Required("region", "body", m.Region); err != nil {
+	if err := validate.RequiredString("region", "body", string(m.Region)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("region", "body", string(*m.Region), 1); err != nil {
+	if err := validate.MinLength("region", "body", string(m.Region), 1); err != nil {
 		return err
 	}
 
 	// value enum
-	if err := m.validateRegionEnum("region", "body", *m.Region); err != nil {
+	if err := m.validateRegionEnum("region", "body", m.Region); err != nil {
 		return err
 	}
 
@@ -293,11 +293,11 @@ func (m *Application) validateRegion(formats strfmt.Registry) error {
 
 func (m *Application) validateRelease(formats strfmt.Registry) error {
 
-	if err := validate.Required("release", "body", m.Release); err != nil {
+	if err := validate.RequiredString("release", "body", string(m.Release)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("release", "body", string(*m.Release), 1); err != nil {
+	if err := validate.MinLength("release", "body", string(m.Release), 1); err != nil {
 		return err
 	}
 
@@ -306,11 +306,11 @@ func (m *Application) validateRelease(formats strfmt.Registry) error {
 
 func (m *Application) validateRepoURL(formats strfmt.Registry) error {
 
-	if err := validate.Required("repoURL", "body", m.RepoURL); err != nil {
+	if err := validate.Required("repoURL", "body", strfmt.URI(m.RepoURL)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("repoURL", "body", string(*m.RepoURL), 1); err != nil {
+	if err := validate.MinLength("repoURL", "body", string(m.RepoURL), 1); err != nil {
 		return err
 	}
 
@@ -361,11 +361,11 @@ func (m *Application) validateTargetRevision(formats strfmt.Registry) error {
 
 func (m *Application) validateTenant(formats strfmt.Registry) error {
 
-	if err := validate.Required("tenant", "body", m.Tenant); err != nil {
+	if err := validate.RequiredString("tenant", "body", string(m.Tenant)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("tenant", "body", string(*m.Tenant), 1); err != nil {
+	if err := validate.MinLength("tenant", "body", string(m.Tenant), 1); err != nil {
 		return err
 	}
 

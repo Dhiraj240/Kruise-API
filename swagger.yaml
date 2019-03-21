@@ -79,18 +79,22 @@ definitions:
         type: string
         description: The name of the application
         minLength: 1
+        x-nullable: false
       release:
         type: string
         description: The version or release name of the application
         minLength: 1
+        x-nullable: false
       tenant:
         type: string
         description: The name of the tenant
         minLength: 1
+        x-nullable: false
       environment:
         type: string
         description: The environment to deploy to
         minLength: 1
+        x-nullable: false
         # TODO: consider making environments configurable
         default: Dev
         enum:
@@ -101,6 +105,7 @@ definitions:
         type: string
         description: The region to deploy to
         minLength: 1
+        x-nullable: false
         # TODO: consider making regions configurable
         default: STL
         enum:
@@ -111,21 +116,25 @@ definitions:
         type: string
         description: The namespace to deploy to
         minLength: 1
+        x-nullable: false
       repoURL:
         type: string
         description: The git repo URL
         minLength: 1
+        x-nullable: false
         format: uri
       path:
         type: string
         description: The relative path to the manifests in the git repo
         minLength: 1
+        x-nullable: false
         format: filepath
         default: "/"
       targetRevision:
         type: string
         description: Defines the commit, tag, or branch in which to sync the application to.
         minLength: 1
+        x-nullable: false
         default: HEAD
       services:
         type: array
@@ -151,10 +160,12 @@ definitions:
         type: string
         description: The name of the service
         minLength: 1
+        x-nullable: false
       tier:
         type: string
         description: The tier for the service
         minLength: 1
+        x-nullable: false
         # TODO: needs to be configurable
         enum:
         - Frontend
@@ -177,12 +188,16 @@ definitions:
         type: string
         description: The name of this port within the service
         minLength: 1
+        x-nullable: false
       port:
         type: integer
         description: The port that will be exposed by this service
+        x-nullable: false
       protocol:
         type: string
         description: The IP protocol for this port. Supports "TCP" and "UDP". Default is TCP
+        minLength: 1
+        x-nullable: false
         default: TCP
         enum:
         - TCP
@@ -191,6 +206,7 @@ definitions:
         type: string
         description: Number or name of the port to access on the pods targeted by the service
         minLength: 1
+        x-nullable: false
     required:
     - name
     - port
@@ -202,6 +218,7 @@ definitions:
         type: string
         description: The name of the ingress
         minLength: 1
+        x-nullable: false
       rules:
         type: array
         items:
@@ -217,6 +234,7 @@ definitions:
         type: string
         description: Host is the fully qualified domain name of a network host, as defined by RFC 3986
         minLength: 1
+        x-nullable: false
       path:
         type: string
         description: Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request
@@ -224,10 +242,12 @@ definitions:
         type: string
         description: Specifies the name of the referenced service
         minLength: 1
+        x-nullable: false
       servicePort:
         type: string
         description: Specifies the port of the referenced service
         minLength: 1
+        x-nullable: false
     required:
     - host
     - serviceName

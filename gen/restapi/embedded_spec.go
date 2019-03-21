@@ -111,7 +111,8 @@ func init() {
             "Dev",
             "Stage",
             "Prod"
-          ]
+          ],
+          "x-nullable": false
         },
         "ingresses": {
           "type": "array",
@@ -122,19 +123,22 @@ func init() {
         "name": {
           "description": "The name of the application",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "namespace": {
           "description": "The namespace to deploy to",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "path": {
           "description": "The relative path to the manifests in the git repo",
           "type": "string",
           "format": "filepath",
           "default": "/",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "region": {
           "description": "The region to deploy to",
@@ -145,18 +149,21 @@ func init() {
             "STL",
             "KCI",
             "BEL"
-          ]
+          ],
+          "x-nullable": false
         },
         "release": {
           "description": "The version or release name of the application",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "repoURL": {
           "description": "The git repo URL",
           "type": "string",
           "format": "uri",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "services": {
           "type": "array",
@@ -168,12 +175,14 @@ func init() {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
           "default": "HEAD",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "tenant": {
           "description": "The name of the tenant",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -210,7 +219,8 @@ func init() {
         "name": {
           "description": "The name of the ingress",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "rules": {
           "type": "array",
@@ -231,7 +241,8 @@ func init() {
         "host": {
           "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "path": {
           "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
@@ -240,12 +251,14 @@ func init() {
         "serviceName": {
           "description": "Specifies the name of the referenced service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "servicePort": {
           "description": "Specifies the port of the referenced service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -260,7 +273,8 @@ func init() {
         "name": {
           "description": "The name of the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "ports": {
           "type": "array",
@@ -277,7 +291,8 @@ func init() {
             "API",
             "Backend",
             "Cache"
-          ]
+          ],
+          "x-nullable": false
         }
       }
     },
@@ -291,25 +306,30 @@ func init() {
         "name": {
           "description": "The name of this port within the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "port": {
           "description": "The port that will be exposed by this service",
-          "type": "integer"
+          "type": "integer",
+          "x-nullable": false
         },
         "protocol": {
           "description": "The IP protocol for this port. Supports \"TCP\" and \"UDP\". Default is TCP",
           "type": "string",
           "default": "TCP",
+          "minLength": 1,
           "enum": [
             "TCP",
             "UDP"
-          ]
+          ],
+          "x-nullable": false
         },
         "targetPort": {
           "description": "Number or name of the port to access on the pods targeted by the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     }
@@ -429,7 +449,8 @@ func init() {
             "Dev",
             "Stage",
             "Prod"
-          ]
+          ],
+          "x-nullable": false
         },
         "ingresses": {
           "type": "array",
@@ -440,19 +461,22 @@ func init() {
         "name": {
           "description": "The name of the application",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "namespace": {
           "description": "The namespace to deploy to",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "path": {
           "description": "The relative path to the manifests in the git repo",
           "type": "string",
           "format": "filepath",
           "default": "/",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "region": {
           "description": "The region to deploy to",
@@ -463,18 +487,21 @@ func init() {
             "STL",
             "KCI",
             "BEL"
-          ]
+          ],
+          "x-nullable": false
         },
         "release": {
           "description": "The version or release name of the application",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "repoURL": {
           "description": "The git repo URL",
           "type": "string",
           "format": "uri",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "services": {
           "type": "array",
@@ -486,12 +513,14 @@ func init() {
           "description": "Defines the commit, tag, or branch in which to sync the application to.",
           "type": "string",
           "default": "HEAD",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "tenant": {
           "description": "The name of the tenant",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -528,7 +557,8 @@ func init() {
         "name": {
           "description": "The name of the ingress",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "rules": {
           "type": "array",
@@ -549,7 +579,8 @@ func init() {
         "host": {
           "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "path": {
           "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
@@ -558,12 +589,14 @@ func init() {
         "serviceName": {
           "description": "Specifies the name of the referenced service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "servicePort": {
           "description": "Specifies the port of the referenced service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -578,7 +611,8 @@ func init() {
         "name": {
           "description": "The name of the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "ports": {
           "type": "array",
@@ -595,7 +629,8 @@ func init() {
             "API",
             "Backend",
             "Cache"
-          ]
+          ],
+          "x-nullable": false
         }
       }
     },
@@ -609,25 +644,30 @@ func init() {
         "name": {
           "description": "The name of this port within the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         },
         "port": {
           "description": "The port that will be exposed by this service",
-          "type": "integer"
+          "type": "integer",
+          "x-nullable": false
         },
         "protocol": {
           "description": "The IP protocol for this port. Supports \"TCP\" and \"UDP\". Default is TCP",
           "type": "string",
           "default": "TCP",
+          "minLength": 1,
           "enum": [
             "TCP",
             "UDP"
-          ]
+          ],
+          "x-nullable": false
         },
         "targetPort": {
           "description": "Number or name of the port to access on the pods targeted by the service",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     }

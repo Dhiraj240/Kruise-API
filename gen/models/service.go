@@ -23,7 +23,7 @@ type Service struct {
 	// The name of the service
 	// Required: true
 	// Min Length: 1
-	Name *string `json:"name"`
+	Name string `json:"name"`
 
 	// ports
 	// Required: true
@@ -33,7 +33,7 @@ type Service struct {
 	// Required: true
 	// Min Length: 1
 	// Enum: [Frontend API Backend Cache]
-	Tier *string `json:"tier"`
+	Tier string `json:"tier"`
 }
 
 // Validate validates this service
@@ -60,11 +60,11 @@ func (m *Service) Validate(formats strfmt.Registry) error {
 
 func (m *Service) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
 		return err
 	}
 
@@ -133,16 +133,16 @@ func (m *Service) validateTierEnum(path, location string, value string) error {
 
 func (m *Service) validateTier(formats strfmt.Registry) error {
 
-	if err := validate.Required("tier", "body", m.Tier); err != nil {
+	if err := validate.RequiredString("tier", "body", string(m.Tier)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("tier", "body", string(*m.Tier), 1); err != nil {
+	if err := validate.MinLength("tier", "body", string(m.Tier), 1); err != nil {
 		return err
 	}
 
 	// value enum
-	if err := m.validateTierEnum("tier", "body", *m.Tier); err != nil {
+	if err := m.validateTierEnum("tier", "body", m.Tier); err != nil {
 		return err
 	}
 
