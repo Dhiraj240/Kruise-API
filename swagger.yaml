@@ -32,11 +32,13 @@ paths:
         required: true
         schema:
           $ref: "#/definitions/application"
+      produces:
+      - "text/plain"
       responses:
         201:
           description: created
           schema:
-            $ref: "#/definitions/application"
+            type: string
         400:
           $ref: "#/responses/BadRequest"
         default:

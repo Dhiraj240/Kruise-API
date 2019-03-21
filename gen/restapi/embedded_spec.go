@@ -34,6 +34,9 @@ func init() {
     "/deployment": {
       "post": {
         "description": "Generates a new Kruise deployment",
+        "produces": [
+          "text/plain"
+        ],
         "tags": [
           "deployments"
         ],
@@ -53,7 +56,7 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/application"
+              "type": "string"
             }
           },
           "400": {
@@ -366,6 +369,9 @@ func init() {
     "/deployment": {
       "post": {
         "description": "Generates a new Kruise deployment",
+        "produces": [
+          "text/plain"
+        ],
         "tags": [
           "deployments"
         ],
@@ -385,7 +391,7 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/application"
+              "type": "string"
             }
           },
           "400": {

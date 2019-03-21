@@ -42,6 +42,12 @@ func main() {
 	// set the port this service will be run on
 	server.Port = *portFlag
 
+	// TODO: flag template directory
+	renderer, err := application.NewRenderer("./_templates")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	api.GeneralGetHealthHandler = general.GetHealthHandlerFunc(
 		func(params general.GetHealthParams) middleware.Responder {
 			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{"OK"})
@@ -53,7 +59,14 @@ func main() {
 				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
 			}
 
-			return deployments.NewCreateDeploymentCreated().WithPayload(application.ApplyDefaults(params.Application))
+			app := application.ApplyDefaults(params.Application)
+
+			rendered, err := renderer.RenderApplication(app)
+			if err != nil {
+				return deployments.NewCreateDeploymentDefault(500).WithPayload(err.Error())
+			}
+
+			return deployments.NewCreateDeploymentCreated().WithPayload(rendered)
 		})
 
 	server.ConfigureAPI()

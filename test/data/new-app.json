@@ -1,5 +1,6 @@
 {
   "name": "molly-data",
+  "release": "v1",
   "tenant": "molly",
   "environment": "Dev",
   "region": "STL",

@@ -40,6 +40,7 @@ func NewDeployWizardAPI(spec *loads.Document) *DeployWizardAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		TxtProducer:         runtime.TextProducer(),
 		DeploymentsCreateDeploymentHandler: deployments.CreateDeploymentHandlerFunc(func(params deployments.CreateDeploymentParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeploymentsCreateDeployment has not yet been implemented")
 		}),
@@ -76,6 +77,8 @@ type DeployWizardAPI struct {
 
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
+	// TxtProducer registers a producer for a "text/plain" mime type
+	TxtProducer runtime.Producer
 
 	// DeploymentsCreateDeploymentHandler sets the operation handler for the create deployment operation
 	DeploymentsCreateDeploymentHandler deployments.CreateDeploymentHandler
@@ -144,6 +147,10 @@ func (o *DeployWizardAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.TxtProducer == nil {
+		unregistered = append(unregistered, "TxtProducer")
+	}
+
 	if o.DeploymentsCreateDeploymentHandler == nil {
 		unregistered = append(unregistered, "deployments.CreateDeploymentHandler")
 	}
@@ -207,6 +214,9 @@ func (o *DeployWizardAPI) ProducersFor(mediaTypes []string) map[string]runtime.P
 
 		case "application/json":
 			result["application/json"] = o.JSONProducer
+
+		case "text/plain":
+			result["text/plain"] = o.TxtProducer
 
 		}
 

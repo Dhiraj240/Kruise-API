@@ -9,8 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-
-	models "deploy-wizard/gen/models"
 )
 
 // CreateDeploymentCreatedCode is the HTTP code returned for type CreateDeploymentCreated
@@ -25,7 +23,7 @@ type CreateDeploymentCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Application `json:"body,omitempty"`
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateDeploymentCreated creates CreateDeploymentCreated with default headers values
@@ -35,13 +33,13 @@ func NewCreateDeploymentCreated() *CreateDeploymentCreated {
 }
 
 // WithPayload adds the payload to the create deployment created response
-func (o *CreateDeploymentCreated) WithPayload(payload *models.Application) *CreateDeploymentCreated {
+func (o *CreateDeploymentCreated) WithPayload(payload string) *CreateDeploymentCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create deployment created response
-func (o *CreateDeploymentCreated) SetPayload(payload *models.Application) {
+func (o *CreateDeploymentCreated) SetPayload(payload string) {
 	o.Payload = payload
 }
 
@@ -49,12 +47,11 @@ func (o *CreateDeploymentCreated) SetPayload(payload *models.Application) {
 func (o *CreateDeploymentCreated) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(201)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
 	}
+
 }
 
 // CreateDeploymentBadRequestCode is the HTTP code returned for type CreateDeploymentBadRequest
