@@ -19,12 +19,12 @@ produces:
 
 paths:
 
-  /deployment:
+  /apps:
     post:
       tags:
-      - deployments
-      operationId: createDeployment
-      description: Generates a new Kruise deployment
+      - apps
+      operationId: createApp
+      description: Generates a new Kruise application
       parameters:
       - name: application
         in: body

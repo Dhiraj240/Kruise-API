@@ -19,7 +19,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"deploy-wizard/gen/restapi/operations/deployments"
+	"deploy-wizard/gen/restapi/operations/apps"
 	"deploy-wizard/gen/restapi/operations/general"
 )
 
@@ -41,8 +41,8 @@ func NewDeployWizardAPI(spec *loads.Document) *DeployWizardAPI {
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
 		TxtProducer:         runtime.TextProducer(),
-		DeploymentsCreateDeploymentHandler: deployments.CreateDeploymentHandlerFunc(func(params deployments.CreateDeploymentParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeploymentsCreateDeployment has not yet been implemented")
+		AppsCreateAppHandler: apps.CreateAppHandlerFunc(func(params apps.CreateAppParams) middleware.Responder {
+			return middleware.NotImplemented("operation AppsCreateApp has not yet been implemented")
 		}),
 		GeneralGetHealthHandler: general.GetHealthHandlerFunc(func(params general.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation GeneralGetHealth has not yet been implemented")
@@ -80,8 +80,8 @@ type DeployWizardAPI struct {
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
-	// DeploymentsCreateDeploymentHandler sets the operation handler for the create deployment operation
-	DeploymentsCreateDeploymentHandler deployments.CreateDeploymentHandler
+	// AppsCreateAppHandler sets the operation handler for the create app operation
+	AppsCreateAppHandler apps.CreateAppHandler
 	// GeneralGetHealthHandler sets the operation handler for the get health operation
 	GeneralGetHealthHandler general.GetHealthHandler
 
@@ -151,8 +151,8 @@ func (o *DeployWizardAPI) Validate() error {
 		unregistered = append(unregistered, "TxtProducer")
 	}
 
-	if o.DeploymentsCreateDeploymentHandler == nil {
-		unregistered = append(unregistered, "deployments.CreateDeploymentHandler")
+	if o.AppsCreateAppHandler == nil {
+		unregistered = append(unregistered, "apps.CreateAppHandler")
 	}
 
 	if o.GeneralGetHealthHandler == nil {
@@ -263,7 +263,7 @@ func (o *DeployWizardAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/deployment"] = deployments.NewCreateDeployment(o.context, o.DeploymentsCreateDeploymentHandler)
+	o.handlers["POST"]["/apps"] = apps.NewCreateApp(o.context, o.AppsCreateAppHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

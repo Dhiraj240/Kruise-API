@@ -31,16 +31,16 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
-    "/deployment": {
+    "/apps": {
       "post": {
-        "description": "Generates a new Kruise deployment",
+        "description": "Generates a new Kruise application",
         "produces": [
           "text/plain"
         ],
         "tags": [
-          "deployments"
+          "apps"
         ],
-        "operationId": "createDeployment",
+        "operationId": "createApp",
         "parameters": [
           {
             "description": "The application to create",
@@ -366,16 +366,16 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
-    "/deployment": {
+    "/apps": {
       "post": {
-        "description": "Generates a new Kruise deployment",
+        "description": "Generates a new Kruise application",
         "produces": [
           "text/plain"
         ],
         "tags": [
-          "deployments"
+          "apps"
         ],
-        "operationId": "createDeployment",
+        "operationId": "createApp",
         "parameters": [
           {
             "description": "The application to create",

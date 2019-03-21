@@ -6,7 +6,7 @@ import (
 	"deploy-wizard/gen/models"
 	"deploy-wizard/gen/restapi"
 	"deploy-wizard/gen/restapi/operations"
-	"deploy-wizard/gen/restapi/operations/deployments"
+	"deploy-wizard/gen/restapi/operations/apps"
 	"deploy-wizard/gen/restapi/operations/general"
 	"deploy-wizard/pkg/application"
 	"github.com/go-openapi/loads"
@@ -53,20 +53,20 @@ func main() {
 			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{"OK"})
 		})
 
-	api.DeploymentsCreateDeploymentHandler = deployments.CreateDeploymentHandlerFunc(
-		func(params deployments.CreateDeploymentParams) middleware.Responder {
+	api.AppsCreateAppHandler = apps.CreateAppHandlerFunc(
+		func(params apps.CreateAppParams) middleware.Responder {
 			if params.Application == nil {
-				return deployments.NewCreateDeploymentBadRequest().WithPayload("application is required")
+				return apps.NewCreateAppBadRequest().WithPayload("application is required")
 			}
 
 			app := application.ApplyDefaults(params.Application)
 
 			rendered, err := renderer.RenderApplication(app)
 			if err != nil {
-				return deployments.NewCreateDeploymentDefault(500).WithPayload(err.Error())
+				return apps.NewCreateAppDefault(500).WithPayload(err.Error())
 			}
 
-			return deployments.NewCreateDeploymentCreated().WithPayload(rendered)
+			return apps.NewCreateAppCreated().WithPayload(rendered)
 		})
 
 	server.ConfigureAPI()

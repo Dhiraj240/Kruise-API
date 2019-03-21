@@ -35,6 +35,8 @@ func configureAPI(api *operations.DeployWizardAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	api.TxtProducer = runtime.TextProducer()
+
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
