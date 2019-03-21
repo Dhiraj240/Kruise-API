@@ -25,9 +25,9 @@ type Service struct {
 	// Min Length: 1
 	Name *string `json:"name"`
 
-	// service ports
+	// ports
 	// Required: true
-	ServicePorts []*ServicePort `json:"servicePorts"`
+	Ports []*ServicePort `json:"ports"`
 
 	// The tier for the service
 	// Required: true
@@ -44,7 +44,7 @@ func (m *Service) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateServicePorts(formats); err != nil {
+	if err := m.validatePorts(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -71,21 +71,21 @@ func (m *Service) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Service) validateServicePorts(formats strfmt.Registry) error {
+func (m *Service) validatePorts(formats strfmt.Registry) error {
 
-	if err := validate.Required("servicePorts", "body", m.ServicePorts); err != nil {
+	if err := validate.Required("ports", "body", m.Ports); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.ServicePorts); i++ {
-		if swag.IsZero(m.ServicePorts[i]) { // not required
+	for i := 0; i < len(m.Ports); i++ {
+		if swag.IsZero(m.Ports[i]) { // not required
 			continue
 		}
 
-		if m.ServicePorts[i] != nil {
-			if err := m.ServicePorts[i].Validate(formats); err != nil {
+		if m.Ports[i] != nil {
+			if err := m.Ports[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("servicePorts" + "." + strconv.Itoa(i))
+					return ve.ValidateName("ports" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

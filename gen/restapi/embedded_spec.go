@@ -248,7 +248,7 @@ func init() {
       "required": [
         "name",
         "tier",
-        "servicePorts"
+        "ports"
       ],
       "properties": {
         "name": {
@@ -256,7 +256,7 @@ func init() {
           "type": "string",
           "minLength": 1
         },
-        "servicePorts": {
+        "ports": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/servicePort"
@@ -560,7 +560,7 @@ func init() {
       "required": [
         "name",
         "tier",
-        "servicePorts"
+        "ports"
       ],
       "properties": {
         "name": {
@@ -568,7 +568,7 @@ func init() {
           "type": "string",
           "minLength": 1
         },
-        "servicePorts": {
+        "ports": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/servicePort"
