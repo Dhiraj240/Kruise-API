@@ -11,6 +11,7 @@ import (
 
 var (
 	name            = "app1"
+	releaseName     = "v1"
 	tenant          = "tenant1"
 	environment     = "Dev"
 	region          = "STL"
@@ -26,6 +27,7 @@ var (
 
 	validApplication = &models.Application{
 		Name:           &name,
+		Release:        &releaseName,
 		Tenant:         &tenant,
 		Environment:    &environment,
 		Region:         &region,
