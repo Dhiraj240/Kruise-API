@@ -18,6 +18,7 @@ require (
 	github.com/justinas/nosurf v0.0.0-20190118163749-6453469bdcc9 // indirect
 	github.com/meatballhat/negroni-logrus v0.0.0-20170801195057-31067281800f
 	github.com/phyber/negroni-gzip v0.0.0-20180113114010-ef6356a5d029 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.0
 	github.com/urfave/negroni v1.0.0 // indirect
 	golang.org/x/net v0.0.0-20181005035420-146acd28ed58
