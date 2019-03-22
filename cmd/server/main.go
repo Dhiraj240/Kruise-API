@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	"strconv"
 
 	"deploy-wizard/gen/models"
 	"deploy-wizard/gen/restapi"
@@ -9,8 +11,10 @@ import (
 	"deploy-wizard/gen/restapi/operations/apps"
 	"deploy-wizard/gen/restapi/operations/general"
 	"deploy-wizard/pkg/application"
+	"deploy-wizard/pkg/metrics"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,6 +27,7 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
+	var metricsPortFlag = flag.Int("metrics-port", 9802, "Metrics port")
 
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
@@ -66,10 +71,16 @@ func main() {
 				return apps.NewCreateAppDefault(500).WithPayload(err.Error())
 			}
 
+			metrics.AppsRenderedCount.WithLabelValues(app.Name).Inc()
 			return apps.NewCreateAppCreated().WithPayload(rendered)
 		})
 
 	server.ConfigureAPI()
+
+	go func() {
+		http.Handle("/metrics", prometheus.Handler())
+		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*metricsPortFlag), nil))
+	}()
 
 	if err := server.Serve(); err != nil {
 		log.Fatal(err)

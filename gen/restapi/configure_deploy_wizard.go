@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"deploy-wizard/gen/restapi/operations"
+	"deploy-wizard/pkg/metrics"
 )
 
 //go:generate swagger generate server --target ../../gen --name DeployWizard --spec ../../swagger.yaml --exclude-main
@@ -66,6 +67,6 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	logViaLogrus := interpose.FromNegroni(negronilogrus.NewCustomMiddleware(log.InfoLevel, &log.JSONFormatter{}, "api"))
 
 	return logViaLogrus(
-		handler,
+		metrics.SetupHandler(handler, "deploy_wizard"),
 	)
 }
