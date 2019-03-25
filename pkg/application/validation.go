@@ -4,20 +4,27 @@ import (
 	"bytes"
 	"deploy-wizard/gen/models"
 	"encoding/json"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	errMsgInvalidJSON      = "invalid json payload"
+	errMsgNotAnApplication = "not an application object"
+)
+
 // ValidateApplication returns of map with key = field and value = error
-func ValidateApplication(appdata interface{}) map[string]string {
-	errors := map[string]string{}
+func ValidateApplication(appdata interface{}) []*models.ValidationError {
+	// errors := map[string]string{}
+	var errors []*models.ValidationError
 
 	var b bytes.Buffer
 	enc := json.NewEncoder(&b)
 	err := enc.Encode(appdata)
 	if err != nil {
-		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf("invalid json payload")
-		errors[""] = "invalid json payload"
+		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf(errMsgInvalidJSON)
+		errors = append(errors, newValidationError("", errMsgInvalidJSON))
 		return errors
 
 	}
@@ -25,46 +32,57 @@ func ValidateApplication(appdata interface{}) map[string]string {
 	var app *models.Application
 	err = json.Unmarshal(b.Bytes(), &app)
 	if err != nil {
-		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf("not an application object")
-		errors[""] = "not an application object"
+		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf(errMsgNotAnApplication)
+		errors = append(errors, newValidationError("", errMsgNotAnApplication))
 		return errors
 	}
 
 	if app.Name == "" {
-		errors["name"] = "name is required"
+		errors = append(errors, newRequiredValidationError("name"))
 	}
 
 	if app.Release == "" {
-		errors["release"] = "release is required"
+		errors = append(errors, newRequiredValidationError("release"))
 	}
 
 	if app.Environment == "" {
-		errors["environment"] = "environment is required"
+		errors = append(errors, newRequiredValidationError("environment"))
 	}
 
 	if app.Tenant == "" {
-		errors["tenant"] = "tenant is required"
+		errors = append(errors, newRequiredValidationError("tenant"))
 	}
 
 	if app.Namespace == "" {
-		errors["namespace"] = "namespace is required"
+		errors = append(errors, newRequiredValidationError("namespace"))
 	}
 
 	if app.Path == "" {
-		errors["path"] = "path is required"
+		errors = append(errors, newRequiredValidationError("path"))
 	}
 
 	if app.Region == "" {
-		errors["region"] = "region is required"
+		errors = append(errors, newRequiredValidationError("region"))
 	}
 
 	if app.RepoURL == "" {
-		errors["repoURL"] = "repoURL is required"
+		errors = append(errors, newRequiredValidationError("repoURL"))
 	}
 
 	if app.TargetRevision == "" {
-		errors["targetRevision"] = "targetRevision is required"
+		errors = append(errors, newRequiredValidationError("targetRevision"))
 	}
 
 	return errors
+}
+
+func newValidationError(name, error string) *models.ValidationError {
+	return &models.ValidationError{
+		Name:  name,
+		Error: error,
+	}
+}
+
+func newRequiredValidationError(name string) *models.ValidationError {
+	return newValidationError(name, fmt.Sprintf("%s is required", name))
 }

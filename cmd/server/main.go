@@ -61,17 +61,8 @@ func main() {
 
 	api.ValidationsValidateApplicationHandler = validations.ValidateApplicationHandlerFunc(
 		func(params validations.ValidateApplicationParams) middleware.Responder {
-			response := &models.ValidationResponse{}
-
 			validationErrors := application.ValidateApplication(params.Application)
-			for name, error := range validationErrors {
-				response.Errors = append(response.Errors, &models.ValidationError{
-					Name:  name,
-					Error: error,
-				})
-			}
-
-			return validations.NewValidateApplicationOK().WithPayload(response)
+			return validations.NewValidateApplicationOK().WithPayload(&models.ValidationResponse{validationErrors})
 		})
 
 	api.AppsCreateAppHandler = apps.CreateAppHandlerFunc(
