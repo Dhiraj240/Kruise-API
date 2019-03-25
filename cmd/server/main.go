@@ -10,6 +10,7 @@ import (
 	"deploy-wizard/gen/restapi/operations"
 	"deploy-wizard/gen/restapi/operations/apps"
 	"deploy-wizard/gen/restapi/operations/general"
+	"deploy-wizard/gen/restapi/operations/validations"
 	"deploy-wizard/pkg/application"
 	"deploy-wizard/pkg/metrics"
 	"github.com/go-openapi/loads"
@@ -56,6 +57,21 @@ func main() {
 	api.GeneralGetHealthHandler = general.GetHealthHandlerFunc(
 		func(params general.GetHealthParams) middleware.Responder {
 			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{"OK"})
+		})
+
+	api.ValidationsValidateApplicationHandler = validations.ValidateApplicationHandlerFunc(
+		func(params validations.ValidateApplicationParams) middleware.Responder {
+			response := &models.ValidationResponse{}
+
+			validationErrors := application.ValidateApplication(params.Application)
+			for name, error := range validationErrors {
+				response.Errors = append(response.Errors, &models.ValidationError{
+					Name:  name,
+					Error: error,
+				})
+			}
+
+			return validations.NewValidateApplicationOK().WithPayload(response)
 		})
 
 	api.AppsCreateAppHandler = apps.CreateAppHandlerFunc(

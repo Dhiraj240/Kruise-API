@@ -19,6 +19,29 @@ produces:
 
 paths:
 
+  /validates/application:
+    post:
+      tags:
+      - validations
+      operationId: validateApplication
+      description: validates the application details
+      parameters:
+      - name: application
+        in: body
+        description: the application object
+        required: true
+        schema:
+          type: object
+      responses:
+        200:
+          description: validated
+          schema:
+            $ref: "#/definitions/validationResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        default:
+          $ref: "#/responses/InternalServerError"
+
   /apps:
     post:
       tags:
@@ -259,6 +282,23 @@ definitions:
     type: object
     properties:
       status:
+        type: string
+
+  validationResponse:
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          $ref: "#/definitions/validationError"
+
+  validationError:
+    type: object
+    properties:
+      name:
+        type: string
+        x-omitempty: false
+      error:
         type: string
 
   error:

@@ -21,6 +21,7 @@ import (
 
 	"deploy-wizard/gen/restapi/operations/apps"
 	"deploy-wizard/gen/restapi/operations/general"
+	"deploy-wizard/gen/restapi/operations/validations"
 )
 
 // NewDeployWizardAPI creates a new DeployWizard instance
@@ -46,6 +47,9 @@ func NewDeployWizardAPI(spec *loads.Document) *DeployWizardAPI {
 		}),
 		GeneralGetHealthHandler: general.GetHealthHandlerFunc(func(params general.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation GeneralGetHealth has not yet been implemented")
+		}),
+		ValidationsValidateApplicationHandler: validations.ValidateApplicationHandlerFunc(func(params validations.ValidateApplicationParams) middleware.Responder {
+			return middleware.NotImplemented("operation ValidationsValidateApplication has not yet been implemented")
 		}),
 	}
 }
@@ -84,6 +88,8 @@ type DeployWizardAPI struct {
 	AppsCreateAppHandler apps.CreateAppHandler
 	// GeneralGetHealthHandler sets the operation handler for the get health operation
 	GeneralGetHealthHandler general.GetHealthHandler
+	// ValidationsValidateApplicationHandler sets the operation handler for the validate application operation
+	ValidationsValidateApplicationHandler validations.ValidateApplicationHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -157,6 +163,10 @@ func (o *DeployWizardAPI) Validate() error {
 
 	if o.GeneralGetHealthHandler == nil {
 		unregistered = append(unregistered, "general.GetHealthHandler")
+	}
+
+	if o.ValidationsValidateApplicationHandler == nil {
+		unregistered = append(unregistered, "validations.ValidateApplicationHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -269,6 +279,11 @@ func (o *DeployWizardAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/health"] = general.NewGetHealth(o.context, o.GeneralGetHealthHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/validates/application"] = validations.NewValidateApplication(o.context, o.ValidationsValidateApplicationHandler)
 
 }
 

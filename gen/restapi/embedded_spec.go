@@ -90,6 +90,40 @@ func init() {
           }
         }
       }
+    },
+    "/validates/application": {
+      "post": {
+        "description": "validates the application details",
+        "tags": [
+          "validations"
+        ],
+        "operationId": "validateApplication",
+        "parameters": [
+          {
+            "description": "the application object",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "validated",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "default": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -333,6 +367,29 @@ func init() {
           "type": "string",
           "minLength": 1,
           "x-nullable": false
+        }
+      }
+    },
+    "validationError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "x-omitempty": false
+        }
+      }
+    },
+    "validationResponse": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/validationError"
+          }
         }
       }
     }
@@ -431,6 +488,46 @@ func init() {
           }
         }
       }
+    },
+    "/validates/application": {
+      "post": {
+        "description": "validates the application details",
+        "tags": [
+          "validations"
+        ],
+        "operationId": "validateApplication",
+        "parameters": [
+          {
+            "description": "the application object",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "validated",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -674,6 +771,29 @@ func init() {
           "type": "string",
           "minLength": 1,
           "x-nullable": false
+        }
+      }
+    },
+    "validationError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "x-omitempty": false
+        }
+      }
+    },
+    "validationResponse": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/validationError"
+          }
         }
       }
     }
