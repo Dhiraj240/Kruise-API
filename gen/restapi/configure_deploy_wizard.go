@@ -10,6 +10,7 @@ import (
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
 	"github.com/meatballhat/negroni-logrus"
+	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 
 	"deploy-wizard/gen/restapi/operations"
@@ -65,8 +66,11 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	logViaLogrus := interpose.FromNegroni(negronilogrus.NewCustomMiddleware(log.InfoLevel, &log.JSONFormatter{}, "api"))
+	handleCORS := cors.Default().Handler
 
-	return logViaLogrus(
-		metrics.SetupHandler(handler, "deploy_wizard"),
+	return handleCORS(
+		logViaLogrus(
+			metrics.SetupHandler(handler, "deploy_wizard"),
+		),
 	)
 }
