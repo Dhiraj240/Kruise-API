@@ -370,25 +370,13 @@ func init() {
         }
       }
     },
-    "validationError": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "x-omitempty": false
-        }
-      }
-    },
     "validationResponse": {
       "type": "object",
       "properties": {
         "errors": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/validationError"
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
           }
         }
       }
@@ -774,25 +762,13 @@ func init() {
         }
       }
     },
-    "validationError": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "x-omitempty": false
-        }
-      }
-    },
     "validationResponse": {
       "type": "object",
       "properties": {
         "errors": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/validationError"
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
           }
         }
       }

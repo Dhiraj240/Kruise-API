@@ -288,18 +288,9 @@ definitions:
     type: object
     properties:
       errors:
-        type: array
-        items:
-          $ref: "#/definitions/validationError"
-
-  validationError:
-    type: object
-    properties:
-      name:
-        type: string
-        x-omitempty: false
-      error:
-        type: string
+        type: object
+        additionalProperties:
+          type: object
 
   error:
     type: object

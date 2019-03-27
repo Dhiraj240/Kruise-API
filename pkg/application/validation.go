@@ -15,16 +15,15 @@ const (
 )
 
 // ValidateApplication returns of map with key = field and value = error
-func ValidateApplication(appdata interface{}) []*models.ValidationError {
-	// errors := map[string]string{}
-	var errors []*models.ValidationError
+func ValidateApplication(appdata interface{}) map[string]interface{} {
+	errors := map[string]interface{}{}
 
 	var b bytes.Buffer
 	enc := json.NewEncoder(&b)
 	err := enc.Encode(appdata)
 	if err != nil {
 		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf(errMsgInvalidJSON)
-		errors = append(errors, newValidationError("", errMsgInvalidJSON))
+		errors[""] = errMsgInvalidJSON
 		return errors
 
 	}
@@ -33,56 +32,49 @@ func ValidateApplication(appdata interface{}) []*models.ValidationError {
 	err = json.Unmarshal(b.Bytes(), &app)
 	if err != nil {
 		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf(errMsgNotAnApplication)
-		errors = append(errors, newValidationError("", errMsgNotAnApplication))
+		errors[""] = errMsgNotAnApplication
 		return errors
 	}
 
 	if app.Name == "" {
-		errors = append(errors, newRequiredValidationError("name"))
+		errors["name"] = newRequiredValidationError("name")
 	}
 
 	if app.Release == "" {
-		errors = append(errors, newRequiredValidationError("release"))
+		errors["release"] = newRequiredValidationError("release")
 	}
 
 	if app.Environment == "" {
-		errors = append(errors, newRequiredValidationError("environment"))
+		errors["environment"] = newRequiredValidationError("environment")
 	}
 
 	if app.Tenant == "" {
-		errors = append(errors, newRequiredValidationError("tenant"))
+		errors["tenant"] = newRequiredValidationError("tenant")
 	}
 
 	if app.Namespace == "" {
-		errors = append(errors, newRequiredValidationError("namespace"))
+		errors["namespace"] = newRequiredValidationError("namespace")
 	}
 
 	if app.Path == "" {
-		errors = append(errors, newRequiredValidationError("path"))
+		errors["path"] = newRequiredValidationError("path")
 	}
 
 	if app.Region == "" {
-		errors = append(errors, newRequiredValidationError("region"))
+		errors["region"] = newRequiredValidationError("region")
 	}
 
 	if app.RepoURL == "" {
-		errors = append(errors, newRequiredValidationError("repoURL"))
+		errors["repoURL"] = newRequiredValidationError("repoURL")
 	}
 
 	if app.TargetRevision == "" {
-		errors = append(errors, newRequiredValidationError("targetRevision"))
+		errors["targetRevision"] = newRequiredValidationError("targetRevision")
 	}
 
 	return errors
 }
 
-func newValidationError(name, error string) *models.ValidationError {
-	return &models.ValidationError{
-		Name:  name,
-		Error: error,
-	}
-}
-
-func newRequiredValidationError(name string) *models.ValidationError {
-	return newValidationError(name, fmt.Sprintf("%s is required", name))
+func newRequiredValidationError(field string) string {
+	return fmt.Sprintf("%s is required", field)
 }
