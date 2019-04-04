@@ -107,6 +107,10 @@ func ValidateService(svc *models.Service) map[string]interface{} {
 		errors["name"] = newRequiredValidationError("name")
 	}
 
+	if svc.Type == "" {
+		errors["type"] = newRequiredValidationError("type")
+	}
+
 	if len(svc.Ports) == 0 {
 		errors["ports"] = newRequiredValidationError("ports")
 		return errors
