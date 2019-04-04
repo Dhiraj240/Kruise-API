@@ -30,10 +30,13 @@ type Service struct {
 	Ports []*ServicePort `json:"ports"`
 
 	// The tier for the service
-	// Required: true
-	// Min Length: 1
 	// Enum: [Frontend API Backend Cache]
-	Tier string `json:"tier"`
+	Tier *string `json:"tier,omitempty"`
+
+	// The service type
+	// Required: true
+	// Enum: [ClusterIP ExternalName LoadBalancer]
+	Type string `json:"type"`
 }
 
 // Validate validates this service
@@ -49,6 +52,10 @@ func (m *Service) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateTier(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -133,16 +140,58 @@ func (m *Service) validateTierEnum(path, location string, value string) error {
 
 func (m *Service) validateTier(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("tier", "body", string(m.Tier)); err != nil {
+	if swag.IsZero(m.Tier) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTierEnum("tier", "body", *m.Tier); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("tier", "body", string(m.Tier), 1); err != nil {
+	return nil
+}
+
+var serviceTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["ClusterIP","ExternalName","LoadBalancer"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		serviceTypeTypePropEnum = append(serviceTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// ServiceTypeClusterIP captures enum value "ClusterIP"
+	ServiceTypeClusterIP string = "ClusterIP"
+
+	// ServiceTypeExternalName captures enum value "ExternalName"
+	ServiceTypeExternalName string = "ExternalName"
+
+	// ServiceTypeLoadBalancer captures enum value "LoadBalancer"
+	ServiceTypeLoadBalancer string = "LoadBalancer"
+)
+
+// prop value enum
+func (m *Service) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, serviceTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Service) validateType(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("type", "body", string(m.Type)); err != nil {
 		return err
 	}
 
 	// value enum
-	if err := m.validateTierEnum("tier", "body", m.Tier); err != nil {
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
 	}
 

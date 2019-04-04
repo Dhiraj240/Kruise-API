@@ -186,11 +186,19 @@ definitions:
         description: The name of the service
         minLength: 1
         x-nullable: false
+      type:
+        type: string
+        description: The service type
+        x-nullable: false
+        # TODO: needs to be configurable
+        enum:
+        - ClusterIP
+        - ExternalName
+        - LoadBalancer
       tier:
         type: string
         description: The tier for the service
-        minLength: 1
-        x-nullable: false
+        x-nullable: true
         # TODO: needs to be configurable
         enum:
         - Frontend
@@ -203,7 +211,7 @@ definitions:
           $ref: "#/definitions/servicePort"
     required:
     - name
-    - tier
+    - type
     - ports
 
   servicePort:

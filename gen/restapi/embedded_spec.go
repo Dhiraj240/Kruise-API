@@ -303,7 +303,7 @@ func init() {
       "type": "object",
       "required": [
         "name",
-        "tier",
+        "type",
         "ports"
       ],
       "properties": {
@@ -322,12 +322,21 @@ func init() {
         "tier": {
           "description": "The tier for the service",
           "type": "string",
-          "minLength": 1,
           "enum": [
             "Frontend",
             "API",
             "Backend",
             "Cache"
+          ],
+          "x-nullable": true
+        },
+        "type": {
+          "description": "The service type",
+          "type": "string",
+          "enum": [
+            "ClusterIP",
+            "ExternalName",
+            "LoadBalancer"
           ],
           "x-nullable": false
         }
@@ -695,7 +704,7 @@ func init() {
       "type": "object",
       "required": [
         "name",
-        "tier",
+        "type",
         "ports"
       ],
       "properties": {
@@ -714,12 +723,21 @@ func init() {
         "tier": {
           "description": "The tier for the service",
           "type": "string",
-          "minLength": 1,
           "enum": [
             "Frontend",
             "API",
             "Backend",
             "Cache"
+          ],
+          "x-nullable": true
+        },
+        "type": {
+          "description": "The service type",
+          "type": "string",
+          "enum": [
+            "ClusterIP",
+            "ExternalName",
+            "LoadBalancer"
           ],
           "x-nullable": false
         }
