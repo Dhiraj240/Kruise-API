@@ -165,10 +165,8 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/service"
-      ingresses:
-        type: array
-        items:
-          $ref: "#/definitions/ingress"
+      ingress:
+        $ref: "#/definitions/ingress"
     required:
     - name
     - release

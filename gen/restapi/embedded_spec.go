@@ -151,11 +151,8 @@ func init() {
           ],
           "x-nullable": false
         },
-        "ingresses": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ingress"
-          }
+        "ingress": {
+          "$ref": "#/definitions/ingress"
         },
         "name": {
           "description": "The name of the application",
@@ -552,11 +549,8 @@ func init() {
           ],
           "x-nullable": false
         },
-        "ingresses": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ingress"
-          }
+        "ingress": {
+          "$ref": "#/definitions/ingress"
         },
         "name": {
           "description": "The name of the application",

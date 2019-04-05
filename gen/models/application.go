@@ -26,8 +26,8 @@ type Application struct {
 	// Enum: [Dev Stage Prod]
 	Environment string `json:"environment"`
 
-	// ingresses
-	Ingresses []*Ingress `json:"ingresses"`
+	// ingress
+	Ingress *Ingress `json:"ingress,omitempty"`
 
 	// The name of the application
 	// Required: true
@@ -81,7 +81,7 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateIngresses(formats); err != nil {
+	if err := m.validateIngress(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -177,26 +177,19 @@ func (m *Application) validateEnvironment(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Application) validateIngresses(formats strfmt.Registry) error {
+func (m *Application) validateIngress(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Ingresses) { // not required
+	if swag.IsZero(m.Ingress) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.Ingresses); i++ {
-		if swag.IsZero(m.Ingresses[i]) { // not required
-			continue
-		}
-
-		if m.Ingresses[i] != nil {
-			if err := m.Ingresses[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("ingresses" + "." + strconv.Itoa(i))
-				}
-				return err
+	if m.Ingress != nil {
+		if err := m.Ingress.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ingress")
 			}
+			return err
 		}
-
 	}
 
 	return nil
