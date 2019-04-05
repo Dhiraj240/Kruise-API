@@ -18,5 +18,17 @@ func ApplyDefaults(app *models.Application) *models.Application {
 		app.Path = defaultApplicationPath
 	}
 
+	for _, service := range app.Services {
+		applyServiceDefaults(service)
+	}
+
 	return app
+}
+
+func applyServiceDefaults(service *models.Service) {
+	for _, port := range service.Ports {
+		if port.Protocol == "" {
+			port.Protocol = "TCP"
+		}
+	}
 }

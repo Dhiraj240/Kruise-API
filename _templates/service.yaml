@@ -2,22 +2,24 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    component: {{component-name}}
-    app: {{application-name}}
-    release: {{release-name-or-version}}
-    tier: {{tier}}
-  name: {{component-name-svc}}
+    component: {{.Service.Name}}
+    app: {{.Service.Name}}
+    release: {{.App.Release}}
+    {{- if  .Service.Tier}}
+    tier: {{ .Service.Tier}}
+    {{- end }}
+  name: {{.Service.Name}}
 spec:
+  {{- range .Service.Ports }}
   ports:
-  - name: {{optional-name}}
-    port: {{port}}
-    protocol: TCP
-    targetPort: {{target-port}}
-  - name: {{optional-name}}
-    port: {{port}}
-    protocol: TCP
-    targetPort: {{target-port}}
+  - name: {{.Name}}
+    port: {{.Port}}
+    protocol: {{.Protocol}}
+    {{- if .TargetPort }}
+    targetPort: {{.TargetPort}}
+    {{- end }}
+  {{- end }}
   selector:
-    app: {{application-name}}
-    component: {{component-name}}
-  type: [[ExternalName,ClusterIP,LoadBalancer]]
+    app: {{.App.Name}}
+    component: {{.App.Name}}
+  type: {{.Service.Type}}
