@@ -5,7 +5,10 @@ import (
 	"deploy-wizard/gen/models"
 	"encoding/json"
 	"fmt"
+	"net"
+	"regexp"
 	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -13,6 +16,10 @@ import (
 const (
 	errMsgInvalidJSON      = "invalid json payload"
 	errMsgNotAnApplication = "not an application object"
+)
+
+var (
+	regexDNSName = regexp.MustCompile(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`)
 )
 
 // ValidateApplication returns of map with key = field and value = error
@@ -77,6 +84,13 @@ func ValidateApplication(appdata interface{}) map[string]interface{} {
 		servicesErrors := ValidateServices(app.Services)
 		if len(servicesErrors) > 0 {
 			errors["services"] = servicesErrors
+		}
+	}
+
+	if app.Ingress != nil {
+		ingressErrors := ValidateIngress(app.Ingress)
+		if len(ingressErrors) > 0 {
+			errors["ingress"] = ingressErrors
 		}
 	}
 
@@ -155,6 +169,76 @@ func ValidateServicePort(port *models.ServicePort) map[string]interface{} {
 	return errors
 }
 
+// ValidateIngress returns of map with key = field and value = error
+func ValidateIngress(ingress *models.Ingress) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if ingress.Name == "" {
+		errors["name"] = newRequiredValidationError("name")
+	}
+
+	if len(ingress.Rules) == 0 {
+		errors["rules"] = newRequiredValidationError("rules")
+		return errors
+	}
+
+	rulesErrors := ValidateIngressRules(ingress.Rules)
+	if len(rulesErrors) > 0 {
+		errors["rules"] = rulesErrors
+	}
+
+	return errors
+}
+
+// ValidateIngressRules returns of map with key = field and value = error
+func ValidateIngressRules(ingressRules []*models.IngressRule) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	for i, ingressRule := range ingressRules {
+		ruleErrors := ValidateIngressRule(ingressRule)
+		idx := strconv.Itoa(i)
+
+		if len(ruleErrors) > 0 {
+			errors[idx] = ruleErrors
+		}
+	}
+
+	return errors
+}
+
+// ValidateIngressRule returns of map with key = field and value = error
+func ValidateIngressRule(ingressRule *models.IngressRule) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if ingressRule.Host == "" {
+		errors["host"] = newRequiredValidationError("host")
+	} else if !isValidDNSName(ingressRule.Host) {
+		errors["host"] = fmt.Sprintf("%q must be a valid host name", ingressRule.Host)
+	}
+
+	if ingressRule.ServiceName == "" {
+		errors["serviceName"] = newRequiredValidationError("serviceName")
+	}
+
+	if ingressRule.ServicePort == "" {
+		errors["servicePort"] = newRequiredValidationError("servicePort")
+	}
+
+	return errors
+}
+
 func newRequiredValidationError(field string) string {
-	return fmt.Sprintf("%s is required", field)
+	return fmt.Sprintf("%q is a required field", field)
+}
+
+func isValidDNSName(host string) bool {
+	if host == "" || len(strings.Replace(host, ".", "", -1)) > 255 {
+		// constraints already violated
+		return false
+	}
+	return !isIP(host) && regexDNSName.MatchString(host)
+}
+
+func isIP(host string) bool {
+	return net.ParseIP(host) != nil
 }
