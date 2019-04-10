@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     component: {{.Service.Name}}
-    app: {{.Service.Name}}
+    app: {{.App.Name}}
     release: {{.App.Release}}
     {{- if  .Service.Tier}}
     tier: {{ .Service.Tier}}

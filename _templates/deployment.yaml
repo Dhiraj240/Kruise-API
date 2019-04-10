@@ -1,96 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{application-name-deployment}}
+  name: {{.App.Name}}
 spec:
-  replicas: {{number-of-replicas}}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{application-name}}
+      app: {{.App.Name}}
   strategy:
-    type: [[RollingUpdate,Recreate]]
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: {{application-name}}
+        app: {{.App.Name}}
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app: {{application-name}}
-                  component: {{component-name}}
-                  release: {{release-name-or-version}}
-              topologyKey: kubernetes.io/hostname
-            weight: {{weight-value}}
       containers:
-      - name: {{application-name}}
-        image: {{AF-image-location>}}:{{version}}
-        imagePullPolicy: [[Always,IfNotPresent]]
-        env:
-        - name: {{env-var-name-1}}
-          value: {{env-var-value-1}}
-        - name: {{env-var-name-N}}
-          value: {{env-var-name-N}}
-
-        # params and values need to have double quotes surrounding them
-        args: [[{{param1}},{{value1}},{{paramN}},{{valueN}}]]
-
-        resources:
-           requests:
-              memory: {{memory-request}}
-              cpu: {{cpu-request}}
-              ephemeral-storage: {{ephemeral-request}}
-           limits:
-              memory: {{memory-limit}}
-              cpu: {{cpu-limit}}
-              ephemeral-storage: {{ephemeral-limit}}
-        livenessProbe:
-          failureThreshold: 10
-          httpGet:
-            path: {{liveness-endpoint}}
-            port: {{liveness-port}}
-          initialDelaySeconds: 60
-          timeoutSeconds: 30
-
-        readinessProbe:
-          httpGet:
-            path: {{readiness-endpoint}}
-            port: {{readiness-port}}
-
-        volumeMounts:
-        - mountPath: {{mount-path-1}}
-          name: {{volume-name-1}}
-          subPath: {{sub-path-1}}
-        - mountPath: {{mount-path-2}}
-          name: {{config-volume}}
-          readOnly: true
-        - mountPath: {{mount-path-N}}
-          name: {{volume-name-N}}
-          subPath: {{sub-path-N}}
-
+      - name: {{.App.Name}}
+        image: {{.Container.Image}}:{{.Container.ImageTag}}
+        imagePullPolicy: {{.Container.ImagePullPolicy}}
         ports:
-        - containerPort: {{port1}}
-          name: {{name-of-connection}}
-          protocol: [[TCP,UDP]]
-        - containerPort: {{portN}}
-          name: {{name-of-connection}}
-          protocol: [[TCP,UDP]]
-
-        volumes:
-        - name: {{volume-name-1}}
-          secret:
-             items:
-             - key: {{key-1}}
-               path: {{value-1}}
-             - key: {{key-N}}
-               path: {{value-N}}
-             secretName: {{secret-name}}
-        - name: {{volume-name-N}}
-          persistentVolumeClaim:
-             claimName: {{persistent-volume-claim-name}}
-        - name: {{config-volume-name}}
-             configMap:
-                name: {{configmap-name}}
+        {{- range .Service.Ports }}
+        - name: {{.Name}}
+          {{- if .TargetPort }}
+          containerPort: {{.TargetPort}}
+          {{- else }}
+          containerPort: {{.Port}}
+          {{- end }}
+          protocol: {{.Protocol}}
+        {{- end }}

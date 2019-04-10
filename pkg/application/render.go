@@ -14,8 +14,9 @@ import (
 )
 
 var templates = map[string][]string{
-	"app":      {"service-account.yaml"},
-	"services": {"service.yaml"},
+	"app":        {"service-account.yaml"},
+	"services":   {"service.yaml"},
+	"deployment": {"deployment.yaml"},
 }
 
 var errTemplateUnreadableFormat = "the %q template must exist and be readable"
@@ -58,8 +59,14 @@ func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	results = append(results, serviceResults...)
+
+	deploymentResults, err := r.renderDeployments(app)
+	if err != nil {
+		return "", err
+	}
+	results = append(results, deploymentResults...)
+
 	return strings.Join(results, "\n\n---\n"), nil
 }
 
@@ -85,6 +92,38 @@ func (r *Renderer) renderServices(app *models.Application) ([]string, error) {
 				return []string{}, err
 			}
 			results = append(results, result)
+		}
+	}
+
+	return results, nil
+}
+
+func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) {
+	var results []string
+
+	data := struct {
+		App       *models.Application
+		Service   *models.Service
+		Container *models.Container
+	}{App: app}
+
+	for _, tmpl := range templates["deployment"] {
+		templateFile, err := templateFile(r.templateDir, tmpl)
+		if err != nil {
+			return []string{}, errors.Wrapf(err, errTemplateUnreadableFormat)
+		}
+
+		for _, service := range app.Services {
+			log.Infof("rendering %q", templateFile)
+			data.Service = service
+			for _, container := range service.Containers {
+				data.Container = container
+				result, err := renderTemplate(templateFile, data)
+				if err != nil {
+					return []string{}, err
+				}
+				results = append(results, result)
+			}
 		}
 	}
 
