@@ -207,6 +207,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/servicePort"
+      containers:
+        type: array
+        items:
+          $ref: "#/definitions/container"
     required:
     - name
     - type
@@ -241,6 +245,39 @@ definitions:
     required:
     - name
     - port
+
+  container:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of this container within the service
+        minLength: 1
+        x-nullable: false
+      image:
+        type: string
+        description: The docker image name for the container
+        minLength: 1
+        x-nullable: false
+      imageTag:
+        type: string
+        description: The docker image tag for the container
+        minLength: 1
+        x-nullable: false
+      imagePullPolicy:
+        type: string
+        description: Image pull policy. One of Always or IfNotPresent.
+        minLength: 1
+        x-nullable: false
+        default: IfNotPresent
+        enum:
+        - Always
+        - IfNotPresent
+      command:
+        type: string
+        description: The command to run for the docker image's entrypoint.
+        minLength: 1
+        x-nullable: true
 
   ingress:
     type: object

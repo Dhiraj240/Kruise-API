@@ -220,6 +220,46 @@ func init() {
         }
       }
     },
+    "container": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The command to run for the docker image's entrypoint.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "image": {
+          "description": "The docker image name for the container",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "imagePullPolicy": {
+          "description": "Image pull policy. One of Always or IfNotPresent.",
+          "type": "string",
+          "default": "IfNotPresent",
+          "minLength": 1,
+          "enum": [
+            "Always",
+            "IfNotPresent"
+          ],
+          "x-nullable": false
+        },
+        "imageTag": {
+          "description": "The docker image tag for the container",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "name": {
+          "description": "The name of this container within the service",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -304,6 +344,12 @@ func init() {
         "ports"
       ],
       "properties": {
+        "containers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container"
+          }
+        },
         "name": {
           "description": "The name of the service",
           "type": "string",
@@ -618,6 +664,46 @@ func init() {
         }
       }
     },
+    "container": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The command to run for the docker image's entrypoint.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "image": {
+          "description": "The docker image name for the container",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "imagePullPolicy": {
+          "description": "Image pull policy. One of Always or IfNotPresent.",
+          "type": "string",
+          "default": "IfNotPresent",
+          "minLength": 1,
+          "enum": [
+            "Always",
+            "IfNotPresent"
+          ],
+          "x-nullable": false
+        },
+        "imageTag": {
+          "description": "The docker image tag for the container",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "name": {
+          "description": "The name of this container within the service",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [
@@ -702,6 +788,12 @@ func init() {
         "ports"
       ],
       "properties": {
+        "containers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container"
+          }
+        },
         "name": {
           "description": "The name of the service",
           "type": "string",

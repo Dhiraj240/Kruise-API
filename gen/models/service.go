@@ -20,6 +20,9 @@ import (
 // swagger:model service
 type Service struct {
 
+	// containers
+	Containers []*Container `json:"containers"`
+
 	// The name of the service
 	// Required: true
 	// Min Length: 1
@@ -43,6 +46,10 @@ type Service struct {
 func (m *Service) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateContainers(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
@@ -62,6 +69,31 @@ func (m *Service) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Service) validateContainers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Containers) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Containers); i++ {
+		if swag.IsZero(m.Containers[i]) { // not required
+			continue
+		}
+
+		if m.Containers[i] != nil {
+			if err := m.Containers[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("containers" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
