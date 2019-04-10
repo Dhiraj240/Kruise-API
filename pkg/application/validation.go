@@ -88,7 +88,7 @@ func ValidateApplication(appdata interface{}) map[string]interface{} {
 	}
 
 	if app.Ingress != nil {
-		ingressErrors := ValidateIngress(app.Ingress)
+		ingressErrors := ValidateIngress(app.Ingress, app.Services)
 		if len(ingressErrors) > 0 {
 			errors["ingress"] = ingressErrors
 		}
@@ -170,19 +170,14 @@ func ValidateServicePort(port *models.ServicePort) map[string]interface{} {
 }
 
 // ValidateIngress returns of map with key = field and value = error
-func ValidateIngress(ingress *models.Ingress) map[string]interface{} {
+func ValidateIngress(ingress *models.Ingress, services []*models.Service) map[string]interface{} {
 	errors := map[string]interface{}{}
 
 	if ingress.Name == "" {
 		errors["name"] = newRequiredValidationError("name")
 	}
 
-	if len(ingress.Rules) == 0 {
-		errors["rules"] = newRequiredValidationError("rules")
-		return errors
-	}
-
-	rulesErrors := ValidateIngressRules(ingress.Rules)
+	rulesErrors := ValidateIngressRules(ingress.Rules, services)
 	if len(rulesErrors) > 0 {
 		errors["rules"] = rulesErrors
 	}
@@ -191,11 +186,11 @@ func ValidateIngress(ingress *models.Ingress) map[string]interface{} {
 }
 
 // ValidateIngressRules returns of map with key = field and value = error
-func ValidateIngressRules(ingressRules []*models.IngressRule) map[string]interface{} {
+func ValidateIngressRules(ingressRules []*models.IngressRule, services []*models.Service) map[string]interface{} {
 	errors := map[string]interface{}{}
 
 	for i, ingressRule := range ingressRules {
-		ruleErrors := ValidateIngressRule(ingressRule)
+		ruleErrors := ValidateIngressRule(ingressRule, services)
 		idx := strconv.Itoa(i)
 
 		if len(ruleErrors) > 0 {
@@ -207,7 +202,7 @@ func ValidateIngressRules(ingressRules []*models.IngressRule) map[string]interfa
 }
 
 // ValidateIngressRule returns of map with key = field and value = error
-func ValidateIngressRule(ingressRule *models.IngressRule) map[string]interface{} {
+func ValidateIngressRule(ingressRule *models.IngressRule, services []*models.Service) map[string]interface{} {
 	errors := map[string]interface{}{}
 
 	if ingressRule.Host == "" {
@@ -216,12 +211,38 @@ func ValidateIngressRule(ingressRule *models.IngressRule) map[string]interface{}
 		errors["host"] = fmt.Sprintf("%q must be a valid host name", ingressRule.Host)
 	}
 
+	var backendService *models.Service
+
 	if ingressRule.ServiceName == "" {
 		errors["serviceName"] = newRequiredValidationError("serviceName")
+	} else {
+		for _, service := range services {
+			if service.Name == ingressRule.ServiceName {
+				backendService = service
+				break
+			}
+		}
+		if backendService == nil {
+			errors["serviceName"] = fmt.Sprintf("%q does not match an exisiting service", ingressRule.ServiceName)
+		}
 	}
 
 	if ingressRule.ServicePort == "" {
 		errors["servicePort"] = newRequiredValidationError("servicePort")
+	} else {
+		if backendService != nil {
+			var validPort bool
+			for _, port := range backendService.Ports {
+				if port.Name == ingressRule.ServicePort {
+					validPort = true
+					break
+				}
+			}
+
+			if !validPort {
+				errors["servicePort"] = fmt.Sprintf("%q does not match a service port for %q", ingressRule.ServicePort, backendService)
+			}
+		}
 	}
 
 	return errors
