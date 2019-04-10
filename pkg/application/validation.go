@@ -135,6 +135,41 @@ func ValidateService(svc *models.Service) map[string]interface{} {
 		errors["ports"] = portsErrors
 	}
 
+	containerErrors := ValidateContainers(svc.Containers)
+	if len(containerErrors) > 0 {
+		errors["containers"] = containerErrors
+	}
+
+	return errors
+}
+
+// ValidateContainers returns of map with key = field and value = error
+func ValidateContainers(containers []*models.Container) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	for i, container := range containers {
+		containerErrors := ValidateContainer(container)
+
+		if len(containerErrors) > 0 {
+			errors[strconv.Itoa(i)] = containerErrors
+		}
+	}
+
+	return errors
+}
+
+// ValidateContainer returns of map with key = field and value = error
+func ValidateContainer(container *models.Container) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if container.Name == "" {
+		errors["name"] = newRequiredValidationError("container")
+	}
+
+	if container.Image == "" {
+		errors["image"] = newRequiredValidationError("image")
+	}
+
 	return errors
 }
 
@@ -144,10 +179,9 @@ func ValidateServicePorts(ports []*models.ServicePort) map[string]interface{} {
 
 	for i, port := range ports {
 		portErrors := ValidateServicePort(port)
-		idx := strconv.Itoa(i)
 
 		if len(portErrors) > 0 {
-			errors[idx] = portErrors
+			errors[strconv.Itoa(i)] = portErrors
 		}
 	}
 
@@ -240,7 +274,7 @@ func ValidateIngressRule(ingressRule *models.IngressRule, services []*models.Ser
 			}
 
 			if !validPort {
-				errors["servicePort"] = fmt.Sprintf("%q does not match a service port for %q", ingressRule.ServicePort, backendService)
+				errors["servicePort"] = fmt.Sprintf("%q does not match a service port for %q", ingressRule.ServicePort, backendService.Name)
 			}
 		}
 	}
