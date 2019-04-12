@@ -1,7 +1,7 @@
 module deploy-wizard
 
 require (
-	github.com/cactus/go-statsd-client/statsd v0.0.0-20190302225832-f5dd73501f04
+	github.com/cactus/go-statsd-client/statsd v0.0.0-20190302225832-f5dd73501f04 // indirect
 	github.com/carbocation/handlers v0.0.0-20140528190747-c939c6d9ef31 // indirect
 	github.com/carbocation/interpose v0.0.0-20161206215253-723534742ba3
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect

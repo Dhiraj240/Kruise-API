@@ -226,7 +226,6 @@ func init() {
         "command": {
           "description": "The command to run for the docker image's entrypoint.",
           "type": "string",
-          "minLength": 1,
           "x-nullable": true
         },
         "image": {
@@ -670,7 +669,6 @@ func init() {
         "command": {
           "description": "The command to run for the docker image's entrypoint.",
           "type": "string",
-          "minLength": 1,
           "x-nullable": true
         },
         "image": {

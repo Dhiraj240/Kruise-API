@@ -20,7 +20,6 @@ import (
 type Container struct {
 
 	// The command to run for the docker image's entrypoint.
-	// Min Length: 1
 	Command *string `json:"command,omitempty"`
 
 	// The docker image name for the container
@@ -45,10 +44,6 @@ type Container struct {
 func (m *Container) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCommand(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateImage(formats); err != nil {
 		res = append(res, err)
 	}
@@ -68,19 +63,6 @@ func (m *Container) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *Container) validateCommand(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Command) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("command", "body", string(*m.Command), 1); err != nil {
-		return err
-	}
-
 	return nil
 }
 

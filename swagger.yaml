@@ -276,7 +276,7 @@ definitions:
       command:
         type: string
         description: The command to run for the docker image's entrypoint.
-        minLength: 1
+        # minLength: 1
         x-nullable: true
 
   ingress:
