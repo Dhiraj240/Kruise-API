@@ -163,11 +163,15 @@ func ValidateContainer(container *models.Container) map[string]interface{} {
 	errors := map[string]interface{}{}
 
 	if container.Name == "" {
-		errors["name"] = newRequiredValidationError("container")
+		errors["name"] = newRequiredValidationError("name")
 	}
 
 	if container.Image == "" {
 		errors["image"] = newRequiredValidationError("image")
+	}
+
+	if container.ImageTag == "" {
+		errors["imageTag"] = newRequiredValidationError("imageTag")
 	}
 
 	return errors
