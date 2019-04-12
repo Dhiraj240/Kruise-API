@@ -10,8 +10,8 @@ metadata:
     {{- end }}
   name: {{.Service.Name}}
 spec:
-  {{- range .Service.Ports }}
   ports:
+  {{- range .Service.Ports }}
   - name: {{.Name}}
     port: {{.Port}}
     protocol: {{.Protocol}}

@@ -1,25 +1,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{.App.Name}}
+  name: {{.Service.Name}}
+  labels:
+    app: {{.App.Name}}
+    component: {{.Service.Name}}
+    release: {{.App.Release}}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: {{.App.Name}}
+      component: {{.Service.Name}}
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
         app: {{.App.Name}}
+        component: {{.Service.Name}}
+        release: {{.App.Release}}
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: {{.App.Name}}
+                  component: {{.Service.Name}}
+                  release: {{.App.Release}}
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      volumes:
+      - name: ca-bundles
+        configMap:
+          name: ca-bundles
       containers:
-      - name: {{.App.Name}}
-        image: {{.Container.Image}}:{{.Container.ImageTag}}
-        imagePullPolicy: {{.Container.ImagePullPolicy}}
+      {{- range .Containers }}
+      - name: {{.Name}}
+        image: {{.Image}}:{{.ImageTag}}
+        imagePullPolicy: {{.ImagePullPolicy}}
+        {{- if .Command }}
+        command: [{{.Command}}]
+        {{- end }}
+        volumeMounts:
+        - mountPath: "/etc/ssl/certs"
+          name: ca-bundles
+          readOnly: true
         ports:
-        {{- range .Service.Ports }}
+        {{- range $.Service.Ports }}
         - name: {{.Name}}
           {{- if .TargetPort }}
           containerPort: {{.TargetPort}}
@@ -28,3 +58,4 @@ spec:
           {{- end }}
           protocol: {{.Protocol}}
         {{- end }}
+      {{- end }}

@@ -102,9 +102,9 @@ func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) 
 	var results []string
 
 	data := struct {
-		App       *models.Application
-		Service   *models.Service
-		Container *models.Container
+		App        *models.Application
+		Service    *models.Service
+		Containers []*models.Container
 	}{App: app}
 
 	for _, tmpl := range templates["deployment"] {
@@ -116,14 +116,12 @@ func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) 
 		for _, service := range app.Services {
 			log.Infof("rendering %q", templateFile)
 			data.Service = service
-			for _, container := range service.Containers {
-				data.Container = container
-				result, err := renderTemplate(templateFile, data)
-				if err != nil {
-					return []string{}, err
-				}
-				results = append(results, result)
+			data.Containers = service.Containers
+			result, err := renderTemplate(templateFile, data)
+			if err != nil {
+				return []string{}, err
 			}
+			results = append(results, result)
 		}
 	}
 
