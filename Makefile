@@ -29,11 +29,11 @@ all: install
 
 .PHONY: install
 install:
-	go install -ldflags '$(LDFLAGS)'
+	go install -ldflags '$(LDFLAGS)' ./cmd/server
 
 .PHONY: build
 build:
-	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o deploy-wizard -ldflags '$(LDFLAGS)' .
+	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o deploy-wizard -ldflags '$(LDFLAGS)' ./cmd/server
 
 .PHONY: test
 test:

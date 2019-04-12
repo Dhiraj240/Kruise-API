@@ -15,4 +15,5 @@ RUN make VERSION=$VERSION build
 FROM alpine:3.9
 RUN apk --no-cache add ca-certificates && rm -rf /var/cache/apk/*
 COPY --from=builder /go/src/deploy-wizard/deploy-wizard /bin
+COPY --from=builder /go/src/deploy-wizard/_templates/ /_templates/
 CMD ["/bin/deploy-wizard"]
