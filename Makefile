@@ -25,7 +25,7 @@ LDFLAGS += -X deploy-wizard/cmd.gitCommit=${GIT_COMMIT}
 LDFLAGS += -X deploy-wizard/cmd.gitTreeState=${GIT_DIRTY}
 
 .PHONY: all
-all: install
+all: genrun
 
 .PHONY: install
 install:
@@ -34,6 +34,16 @@ install:
 .PHONY: build
 build:
 	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o deploy-wizard -ldflags '$(LDFLAGS)' ./cmd/server
+
+.PHONY: gen
+gen:
+	swagger generate server -t gen -f swagger.yaml --exclude-main -A deploy-wizard
+
+.PHONY: run
+run:
+	go run cmd/server/main.go
+
+genrun: gen run
 
 .PHONY: test
 test:
