@@ -6,15 +6,14 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	"deploy-wizard/gen/restapi/operations"
+	"deploy-wizard/pkg/metrics"
 	interpose "github.com/carbocation/interpose/adaptors"
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
-
-	"deploy-wizard/gen/restapi/operations"
-	"deploy-wizard/pkg/metrics"
 )
 
 //go:generate swagger generate server --target ../../gen --name DeployWizard --spec ../../swagger.yaml --exclude-main

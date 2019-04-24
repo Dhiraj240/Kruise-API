@@ -31,19 +31,19 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
-    "/apps": {
+    "/app/preview": {
       "post": {
-        "description": "Generates a new Kruise application",
+        "description": "Previews a new Kruise application",
         "produces": [
           "text/plain"
         ],
         "tags": [
           "apps"
         ],
-        "operationId": "createApp",
+        "operationId": "previewApp",
         "parameters": [
           {
-            "description": "The application to create",
+            "description": "The application to preview",
             "name": "application",
             "in": "body",
             "required": true,
@@ -57,6 +57,74 @@ func init() {
             "description": "created",
             "schema": {
               "type": "string"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "default": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/app/release": {
+      "post": {
+        "description": "Generates a new Kruise application",
+        "tags": [
+          "apps"
+        ],
+        "operationId": "releaseApp",
+        "parameters": [
+          {
+            "description": "The application to generate",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "default": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/app/validation": {
+      "post": {
+        "description": "Validates the Kruise application",
+        "tags": [
+          "validations"
+        ],
+        "operationId": "validateApplication",
+        "parameters": [
+          {
+            "description": "the application object",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "validated",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
             }
           },
           "400": {
@@ -87,40 +155,6 @@ func init() {
             "schema": {
               "$ref": "#/definitions/error"
             }
-          }
-        }
-      }
-    },
-    "/validates/application": {
-      "post": {
-        "description": "validates the application details",
-        "tags": [
-          "validations"
-        ],
-        "operationId": "validateApplication",
-        "parameters": [
-          {
-            "description": "the application object",
-            "name": "application",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "validated",
-            "schema": {
-              "$ref": "#/definitions/validationResponse"
-            }
-          },
-          "400": {
-            "$ref": "#/responses/BadRequest"
-          },
-          "default": {
-            "$ref": "#/responses/InternalServerError"
           }
         }
       }
@@ -462,19 +496,19 @@ func init() {
     "version": "0.0.1"
   },
   "paths": {
-    "/apps": {
+    "/app/preview": {
       "post": {
-        "description": "Generates a new Kruise application",
+        "description": "Previews a new Kruise application",
         "produces": [
           "text/plain"
         ],
         "tags": [
           "apps"
         ],
-        "operationId": "createApp",
+        "operationId": "previewApp",
         "parameters": [
           {
-            "description": "The application to create",
+            "description": "The application to preview",
             "name": "application",
             "in": "body",
             "required": true,
@@ -488,6 +522,86 @@ func init() {
             "description": "created",
             "schema": {
               "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/app/release": {
+      "post": {
+        "description": "Generates a new Kruise application",
+        "tags": [
+          "apps"
+        ],
+        "operationId": "releaseApp",
+        "parameters": [
+          {
+            "description": "The application to generate",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/application"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "default": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/app/validation": {
+      "post": {
+        "description": "Validates the Kruise application",
+        "tags": [
+          "validations"
+        ],
+        "operationId": "validateApplication",
+        "parameters": [
+          {
+            "description": "the application object",
+            "name": "application",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "validated",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
             }
           },
           "400": {
@@ -523,46 +637,6 @@ func init() {
             "description": "Error response",
             "schema": {
               "$ref": "#/definitions/error"
-            }
-          }
-        }
-      }
-    },
-    "/validates/application": {
-      "post": {
-        "description": "validates the application details",
-        "tags": [
-          "validations"
-        ],
-        "operationId": "validateApplication",
-        "parameters": [
-          {
-            "description": "the application object",
-            "name": "application",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "validated",
-            "schema": {
-              "$ref": "#/definitions/validationResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "default": {
-            "description": "Internal server error",
-            "schema": {
-              "type": "string"
             }
           }
         }

@@ -42,11 +42,14 @@ func NewDeployWizardAPI(spec *loads.Document) *DeployWizardAPI {
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
 		TxtProducer:         runtime.TextProducer(),
-		AppsCreateAppHandler: apps.CreateAppHandlerFunc(func(params apps.CreateAppParams) middleware.Responder {
-			return middleware.NotImplemented("operation AppsCreateApp has not yet been implemented")
-		}),
 		GeneralGetHealthHandler: general.GetHealthHandlerFunc(func(params general.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation GeneralGetHealth has not yet been implemented")
+		}),
+		AppsPreviewAppHandler: apps.PreviewAppHandlerFunc(func(params apps.PreviewAppParams) middleware.Responder {
+			return middleware.NotImplemented("operation AppsPreviewApp has not yet been implemented")
+		}),
+		AppsReleaseAppHandler: apps.ReleaseAppHandlerFunc(func(params apps.ReleaseAppParams) middleware.Responder {
+			return middleware.NotImplemented("operation AppsReleaseApp has not yet been implemented")
 		}),
 		ValidationsValidateApplicationHandler: validations.ValidateApplicationHandlerFunc(func(params validations.ValidateApplicationParams) middleware.Responder {
 			return middleware.NotImplemented("operation ValidationsValidateApplication has not yet been implemented")
@@ -84,10 +87,12 @@ type DeployWizardAPI struct {
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
-	// AppsCreateAppHandler sets the operation handler for the create app operation
-	AppsCreateAppHandler apps.CreateAppHandler
 	// GeneralGetHealthHandler sets the operation handler for the get health operation
 	GeneralGetHealthHandler general.GetHealthHandler
+	// AppsPreviewAppHandler sets the operation handler for the preview app operation
+	AppsPreviewAppHandler apps.PreviewAppHandler
+	// AppsReleaseAppHandler sets the operation handler for the release app operation
+	AppsReleaseAppHandler apps.ReleaseAppHandler
 	// ValidationsValidateApplicationHandler sets the operation handler for the validate application operation
 	ValidationsValidateApplicationHandler validations.ValidateApplicationHandler
 
@@ -157,12 +162,16 @@ func (o *DeployWizardAPI) Validate() error {
 		unregistered = append(unregistered, "TxtProducer")
 	}
 
-	if o.AppsCreateAppHandler == nil {
-		unregistered = append(unregistered, "apps.CreateAppHandler")
-	}
-
 	if o.GeneralGetHealthHandler == nil {
 		unregistered = append(unregistered, "general.GetHealthHandler")
+	}
+
+	if o.AppsPreviewAppHandler == nil {
+		unregistered = append(unregistered, "apps.PreviewAppHandler")
+	}
+
+	if o.AppsReleaseAppHandler == nil {
+		unregistered = append(unregistered, "apps.ReleaseAppHandler")
 	}
 
 	if o.ValidationsValidateApplicationHandler == nil {
@@ -270,11 +279,6 @@ func (o *DeployWizardAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/apps"] = apps.NewCreateApp(o.context, o.AppsCreateAppHandler)
-
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -283,7 +287,17 @@ func (o *DeployWizardAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/validates/application"] = validations.NewValidateApplication(o.context, o.ValidationsValidateApplicationHandler)
+	o.handlers["POST"]["/app/preview"] = apps.NewPreviewApp(o.context, o.AppsPreviewAppHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/app/release"] = apps.NewReleaseApp(o.context, o.AppsReleaseAppHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/app/validation"] = validations.NewValidateApplication(o.context, o.ValidationsValidateApplicationHandler)
 
 }
 

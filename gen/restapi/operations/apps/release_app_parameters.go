@@ -16,23 +16,23 @@ import (
 	models "deploy-wizard/gen/models"
 )
 
-// NewCreateAppParams creates a new CreateAppParams object
+// NewReleaseAppParams creates a new ReleaseAppParams object
 // no default values defined in spec.
-func NewCreateAppParams() CreateAppParams {
+func NewReleaseAppParams() ReleaseAppParams {
 
-	return CreateAppParams{}
+	return ReleaseAppParams{}
 }
 
-// CreateAppParams contains all the bound params for the create app operation
+// ReleaseAppParams contains all the bound params for the release app operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters createApp
-type CreateAppParams struct {
+// swagger:parameters releaseApp
+type ReleaseAppParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*The application to create
+	/*The application to generate
 	  Required: true
 	  In: body
 	*/
@@ -42,8 +42,8 @@ type CreateAppParams struct {
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewCreateAppParams() beforehand.
-func (o *CreateAppParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewReleaseAppParams() beforehand.
+func (o *ReleaseAppParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r

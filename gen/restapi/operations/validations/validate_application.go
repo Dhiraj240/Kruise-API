@@ -29,9 +29,9 @@ func NewValidateApplication(ctx *middleware.Context, handler ValidateApplication
 	return &ValidateApplication{Context: ctx, Handler: handler}
 }
 
-/*ValidateApplication swagger:route POST /validates/application validations validateApplication
+/*ValidateApplication swagger:route POST /app/validation validations validateApplication
 
-validates the application details
+Validates the Kruise application
 
 */
 type ValidateApplication struct {

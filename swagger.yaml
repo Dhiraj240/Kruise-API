@@ -19,12 +19,12 @@ produces:
 
 paths:
 
-  /validates/application:
+  /app/validation:
     post:
       tags:
       - validations
       operationId: validateApplication
-      description: validates the application details
+      description: Validates the Kruise application
       parameters:
       - name: application
         in: body
@@ -42,16 +42,16 @@ paths:
         default:
           $ref: "#/responses/InternalServerError"
 
-  /apps:
+  /app/preview:
     post:
       tags:
       - apps
-      operationId: createApp
-      description: Generates a new Kruise application
+      operationId: previewApp
+      description: Previews a new Kruise application
       parameters:
       - name: application
         in: body
-        description: The application to create
+        description: The application to preview
         required: true
         schema:
           $ref: "#/definitions/application"
@@ -62,6 +62,29 @@ paths:
           description: created
           schema:
             type: string
+        400:
+          $ref: "#/responses/BadRequest"
+        default:
+          $ref: "#/responses/InternalServerError"
+
+  /app/release:
+    post:
+      tags:
+      - apps
+      operationId: releaseApp
+      description: Generates a new Kruise application
+      parameters:
+      - name: application
+        in: body
+        description: The application to generate
+        required: true
+        schema:
+          $ref: "#/definitions/application"
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: "#/definitions/validationResponse"
         400:
           $ref: "#/responses/BadRequest"
         default:

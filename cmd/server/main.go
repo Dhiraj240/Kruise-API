@@ -65,21 +65,27 @@ func main() {
 			return validations.NewValidateApplicationOK().WithPayload(&models.ValidationResponse{validationErrors})
 		})
 
-	api.AppsCreateAppHandler = apps.CreateAppHandlerFunc(
-		func(params apps.CreateAppParams) middleware.Responder {
+	api.AppsPreviewAppHandler = apps.PreviewAppHandlerFunc(
+		func(params apps.PreviewAppParams) middleware.Responder {
 			if params.Application == nil {
-				return apps.NewCreateAppBadRequest().WithPayload("application is required")
+				return apps.NewPreviewAppBadRequest().WithPayload("application is required")
 			}
 
 			app := application.ApplyDefaults(params.Application)
 
 			rendered, err := renderer.RenderApplication(app)
 			if err != nil {
-				return apps.NewCreateAppDefault(500).WithPayload(err.Error())
+				return apps.NewPreviewAppDefault(500).WithPayload(err.Error())
 			}
 
 			metrics.AppsRenderedCount.WithLabelValues(app.Name).Inc()
-			return apps.NewCreateAppCreated().WithPayload(rendered)
+			return apps.NewPreviewAppCreated().WithPayload(rendered)
+		})
+
+	api.AppsReleaseAppHandler = apps.ReleaseAppHandlerFunc(
+		func(params apps.ReleaseAppParams) middleware.Responder {
+			validationErrors := application.ValidateApplication(params.Application)
+			return apps.NewReleaseAppCreated().WithPayload(&models.ValidationResponse{validationErrors})
 		})
 
 	server.ConfigureAPI()
