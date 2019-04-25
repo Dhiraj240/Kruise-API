@@ -34,8 +34,8 @@ func SetupHandler(handler http.Handler, app string) http.Handler {
 		counter.WithLabelValues(app, r.URL.String(), r.Method, fmt.Sprintf("%d", statusCode)).Inc()
 	})
 
-	prometheus.Register(histogram)
-	prometheus.Register(counter)
-	prometheus.Register(AppsRenderedCount)
+	prometheus.MustRegister(histogram)
+	prometheus.MustRegister(counter)
+	prometheus.MustRegister(AppsRenderedCount)
 	return h
 }

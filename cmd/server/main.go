@@ -15,13 +15,8 @@ import (
 	"deploy-wizard/pkg/metrics"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
-)
-
-const (
-	defaultApplicationTargetRevision = "HEAD"
-	defaultApplicationPath           = "/"
 )
 
 func main() {
@@ -56,19 +51,20 @@ func main() {
 
 	api.GeneralGetHealthHandler = general.GetHealthHandlerFunc(
 		func(params general.GetHealthParams) middleware.Responder {
-			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{"OK"})
+			return general.NewGetHealthOK().WithPayload(&models.HealthStatus{Status: "OK"})
 		})
 
 	api.ValidationsValidateApplicationHandler = validations.ValidateApplicationHandlerFunc(
 		func(params validations.ValidateApplicationParams) middleware.Responder {
 			validationErrors := application.ValidateApplication(params.Application)
-			return validations.NewValidateApplicationOK().WithPayload(&models.ValidationResponse{validationErrors})
+			return validations.NewValidateApplicationOK().WithPayload(&models.ValidationResponse{Errors: validationErrors})
 		})
 
 	api.AppsPreviewAppHandler = apps.PreviewAppHandlerFunc(
 		func(params apps.PreviewAppParams) middleware.Responder {
 			if params.Application == nil {
-				return apps.NewPreviewAppBadRequest().WithPayload("application is required")
+				return apps.NewPreviewAppBadRequest().
+					WithPayload("application is required")
 			}
 
 			app := application.ApplyDefaults(params.Application)
@@ -85,13 +81,13 @@ func main() {
 	api.AppsReleaseAppHandler = apps.ReleaseAppHandlerFunc(
 		func(params apps.ReleaseAppParams) middleware.Responder {
 			validationErrors := application.ValidateApplication(params.Application)
-			return apps.NewReleaseAppCreated().WithPayload(&models.ValidationResponse{validationErrors})
+			return apps.NewReleaseAppCreated().WithPayload(&models.ValidationResponse{Errors: validationErrors})
 		})
 
 	server.ConfigureAPI()
 
 	go func() {
-		http.Handle("/metrics", prometheus.Handler())
+		http.Handle("/metrics", promhttp.Handler())
 		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*metricsPortFlag), nil))
 	}()
 

@@ -9,6 +9,11 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
+func defaultTier() *string {
+	t := "Frontend"
+	return &t
+}
+
 var (
 	validApplication = &models.Application{
 		Name:           "app1",
@@ -23,7 +28,7 @@ var (
 		Services: []*models.Service{
 			{
 				Name: "app1",
-				Tier: "Frontend",
+				Tier: defaultTier(),
 				Ports: []*models.ServicePort{
 					{
 						Name: "http",
@@ -38,7 +43,7 @@ var (
 				},
 			},
 		},
-		Ingresses: []*models.Ingress{},
+		Ingress: &models.Ingress{},
 	}
 
 	expected = `apiVersion: v1
