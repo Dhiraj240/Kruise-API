@@ -63,8 +63,7 @@ func main() {
 	api.AppsPreviewAppHandler = apps.PreviewAppHandlerFunc(
 		func(params apps.PreviewAppParams) middleware.Responder {
 			if params.Application == nil {
-				return apps.NewPreviewAppBadRequest().
-					WithPayload("application is required")
+				return apps.NewPreviewAppBadRequest().WithPayload("application is required")
 			}
 
 			app := application.ApplyDefaults(params.Application)
