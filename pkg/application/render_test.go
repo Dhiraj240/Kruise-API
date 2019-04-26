@@ -155,6 +155,40 @@ spec:
 `
 )
 
+func TestRenderManifests(t *testing.T) {
+	app := application.ApplyDefaults(validApplication)
+
+	renderer, err := application.NewRenderer("../../_templates")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	results, err := renderer.RenderManifests(app)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, ok := results["service-account.yaml"]; !ok {
+		t.Error("service-account.yaml not found")
+		t.Log(results)
+		t.FailNow()
+	}
+
+	if _, ok := results["service-app1.yaml"]; !ok {
+		t.Error("service-app1.yaml not found")
+		t.Log(results)
+		t.FailNow()
+	}
+
+	if _, ok := results["deployment-app1.yaml"]; !ok {
+		t.Error("deployment-app1.yaml not found")
+		t.Log(results)
+		t.FailNow()
+	}
+}
+
 func TestRenderApplication(t *testing.T) {
 	app := application.ApplyDefaults(validApplication)
 

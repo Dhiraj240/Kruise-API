@@ -2,6 +2,7 @@ package application
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -38,40 +39,63 @@ func NewRenderer(templateDir string) (*Renderer, error) {
 	return &Renderer{templateDir}, nil
 }
 
-// RenderApplication renders an application to Kubernetes manifests
-func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
-	var results []string
+// RenderManifests renders an application to individual Kubernetes manifest files
+func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
+
 	for _, tmpl := range templates["app"] {
 		templateFile, err := templateFile(r.templateDir, tmpl)
 		if err != nil {
-			return "", errors.Wrapf(err, errTemplateUnreadableFormat)
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
 		}
 
 		log.Infof("rendering %q", templateFile)
 		result, err := renderTemplate(templateFile, app)
 		if err != nil {
-			return "", err
+			return manifests, err
 		}
-		results = append(results, result)
+		manifests[tmpl] = result
 	}
 
 	serviceResults, err := r.renderServices(app)
 	if err != nil {
-		return "", err
+		return manifests, err
 	}
-	results = append(results, serviceResults...)
+	for filename, content := range serviceResults {
+		manifests[filename] = content
+	}
 
 	deploymentResults, err := r.renderDeployments(app)
 	if err != nil {
+		return manifests, err
+	}
+	for filename, content := range deploymentResults {
+		manifests[filename] = content
+	}
+
+	return manifests, nil
+}
+
+// RenderApplication renders an application to Kubernetes manifests
+func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
+	var results []string
+	manifests, err := r.RenderManifests(app)
+	if err != nil {
 		return "", err
 	}
-	results = append(results, deploymentResults...)
+
+	// render in a specific order
+	results = append(results, manifests["service-account.yaml"])
+	for _, service := range app.Services {
+		results = append(results, manifests[serviceName(service)])
+		results = append(results, manifests[deploymentName(service)])
+	}
 
 	return strings.Join(results, "\n\n---\n"), nil
 }
 
-func (r *Renderer) renderServices(app *models.Application) ([]string, error) {
-	var results []string
+func (r *Renderer) renderServices(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
 
 	data := struct {
 		App     *models.Application
@@ -81,7 +105,7 @@ func (r *Renderer) renderServices(app *models.Application) ([]string, error) {
 	for _, tmpl := range templates["services"] {
 		templateFile, err := templateFile(r.templateDir, tmpl)
 		if err != nil {
-			return []string{}, errors.Wrapf(err, errTemplateUnreadableFormat)
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
 		}
 
 		for _, service := range app.Services {
@@ -89,17 +113,17 @@ func (r *Renderer) renderServices(app *models.Application) ([]string, error) {
 			data.Service = service
 			result, err := renderTemplate(templateFile, data)
 			if err != nil {
-				return []string{}, err
+				return manifests, err
 			}
-			results = append(results, result)
+			manifests[serviceName(service)] = result
 		}
 	}
 
-	return results, nil
+	return manifests, nil
 }
 
-func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) {
-	var results []string
+func (r *Renderer) renderDeployments(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
 
 	data := struct {
 		App        *models.Application
@@ -110,7 +134,7 @@ func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) 
 	for _, tmpl := range templates["deployment"] {
 		templateFile, err := templateFile(r.templateDir, tmpl)
 		if err != nil {
-			return []string{}, errors.Wrapf(err, errTemplateUnreadableFormat)
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
 		}
 
 		for _, service := range app.Services {
@@ -119,13 +143,13 @@ func (r *Renderer) renderDeployments(app *models.Application) ([]string, error) 
 			data.Containers = service.Containers
 			result, err := renderTemplate(templateFile, data)
 			if err != nil {
-				return []string{}, err
+				return manifests, err
 			}
-			results = append(results, result)
+			manifests[deploymentName(service)] = result
 		}
 	}
 
-	return results, nil
+	return manifests, nil
 }
 
 // RenderTemplate renders the specified template with the Application model
@@ -157,4 +181,12 @@ func templateFile(templateDir, name string) (string, error) {
 		return "", err
 	}
 	return filename, nil
+}
+
+func serviceName(s *models.Service) string {
+	return fmt.Sprintf("service-%s.yaml", s.Name)
+}
+
+func deploymentName(s *models.Service) string {
+	return fmt.Sprintf("deployment-%s.yaml", s.Name)
 }
