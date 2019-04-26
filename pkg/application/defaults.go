@@ -26,6 +26,9 @@ func ApplyDefaults(app *models.Application) *models.Application {
 }
 
 func applyServiceDefaults(service *models.Service) {
+	if service.Type == "" {
+		service.Type = "ClusterIP"
+	}
 	for _, port := range service.Ports {
 		if port.Protocol == "" {
 			port.Protocol = "TCP"
