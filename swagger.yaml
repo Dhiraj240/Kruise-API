@@ -86,7 +86,9 @@ paths:
           schema:
             $ref: "#/definitions/validationResponse"
         400:
-          $ref: "#/responses/BadRequest"
+          description: invalid
+          schema:
+            $ref: "#/definitions/validationResponse"
         default:
           $ref: "#/responses/InternalServerError"
 
@@ -116,7 +118,7 @@ responses:
   InternalServerError:
     description: Internal server error
     schema:
-      type: string
+      $ref: "#/definitions/error"
 
 definitions:
 
@@ -368,3 +370,5 @@ definitions:
         format: int64
       message:
         type: string
+        minLength: 1
+        x-nullable: false

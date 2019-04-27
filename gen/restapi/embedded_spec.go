@@ -94,7 +94,10 @@ func init() {
             }
           },
           "400": {
-            "$ref": "#/responses/BadRequest"
+            "description": "invalid",
+            "schema": {
+              "$ref": "#/definitions/validationResponse"
+            }
           },
           "default": {
             "$ref": "#/responses/InternalServerError"
@@ -304,7 +307,9 @@ func init() {
           "format": "int64"
         },
         "message": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -477,7 +482,7 @@ func init() {
     "InternalServerError": {
       "description": "Internal server error",
       "schema": {
-        "type": "string"
+        "$ref": "#/definitions/error"
       }
     }
   }
@@ -533,7 +538,7 @@ func init() {
           "default": {
             "description": "Internal server error",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -565,15 +570,15 @@ func init() {
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "invalid",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/validationResponse"
             }
           },
           "default": {
             "description": "Internal server error",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -613,7 +618,7 @@ func init() {
           "default": {
             "description": "Internal server error",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -787,7 +792,9 @@ func init() {
           "format": "int64"
         },
         "message": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -960,7 +967,7 @@ func init() {
     "InternalServerError": {
       "description": "Internal server error",
       "schema": {
-        "type": "string"
+        "$ref": "#/definitions/error"
       }
     }
   }

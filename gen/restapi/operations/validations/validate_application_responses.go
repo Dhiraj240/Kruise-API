@@ -110,7 +110,7 @@ type ValidateApplicationDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewValidateApplicationDefault creates ValidateApplicationDefault with default headers values
@@ -136,13 +136,13 @@ func (o *ValidateApplicationDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the validate application default response
-func (o *ValidateApplicationDefault) WithPayload(payload string) *ValidateApplicationDefault {
+func (o *ValidateApplicationDefault) WithPayload(payload *models.Error) *ValidateApplicationDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the validate application default response
-func (o *ValidateApplicationDefault) SetPayload(payload string) {
+func (o *ValidateApplicationDefault) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
@@ -150,9 +150,10 @@ func (o *ValidateApplicationDefault) SetPayload(payload string) {
 func (o *ValidateApplicationDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(o._statusCode)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }

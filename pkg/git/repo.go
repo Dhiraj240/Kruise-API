@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/src-d/go-billy.v4"
@@ -88,7 +89,13 @@ func (r *Repo) Commit(msg string) error {
 
 	// write all files to the in-memory filesystem
 	for name, content := range r.files {
-		filename := filepath.Join(r.prefix, name)
+		filename := filepath.Join(strings.TrimPrefix(r.prefix, "/"), name)
+
+		err = r.fs.MkdirAll(filepath.Dir(filename), 0755)
+		if err != nil {
+			return err
+		}
+
 		f, err := r.fs.Create(filename)
 		if err != nil {
 			return err

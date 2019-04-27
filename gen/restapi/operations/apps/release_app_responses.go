@@ -60,7 +60,7 @@ func (o *ReleaseAppCreated) WriteResponse(rw http.ResponseWriter, producer runti
 // ReleaseAppBadRequestCode is the HTTP code returned for type ReleaseAppBadRequest
 const ReleaseAppBadRequestCode int = 400
 
-/*ReleaseAppBadRequest Bad request
+/*ReleaseAppBadRequest invalid
 
 swagger:response releaseAppBadRequest
 */
@@ -69,7 +69,7 @@ type ReleaseAppBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.ValidationResponse `json:"body,omitempty"`
 }
 
 // NewReleaseAppBadRequest creates ReleaseAppBadRequest with default headers values
@@ -79,13 +79,13 @@ func NewReleaseAppBadRequest() *ReleaseAppBadRequest {
 }
 
 // WithPayload adds the payload to the release app bad request response
-func (o *ReleaseAppBadRequest) WithPayload(payload string) *ReleaseAppBadRequest {
+func (o *ReleaseAppBadRequest) WithPayload(payload *models.ValidationResponse) *ReleaseAppBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the release app bad request response
-func (o *ReleaseAppBadRequest) SetPayload(payload string) {
+func (o *ReleaseAppBadRequest) SetPayload(payload *models.ValidationResponse) {
 	o.Payload = payload
 }
 
@@ -93,11 +93,12 @@ func (o *ReleaseAppBadRequest) SetPayload(payload string) {
 func (o *ReleaseAppBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(400)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }
 
 /*ReleaseAppDefault Internal server error
@@ -110,7 +111,7 @@ type ReleaseAppDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewReleaseAppDefault creates ReleaseAppDefault with default headers values
@@ -136,13 +137,13 @@ func (o *ReleaseAppDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the release app default response
-func (o *ReleaseAppDefault) WithPayload(payload string) *ReleaseAppDefault {
+func (o *ReleaseAppDefault) WithPayload(payload *models.Error) *ReleaseAppDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the release app default response
-func (o *ReleaseAppDefault) SetPayload(payload string) {
+func (o *ReleaseAppDefault) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
@@ -150,9 +151,10 @@ func (o *ReleaseAppDefault) SetPayload(payload string) {
 func (o *ReleaseAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(o._statusCode)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }

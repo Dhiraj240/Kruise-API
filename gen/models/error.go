@@ -22,7 +22,8 @@ type Error struct {
 
 	// message
 	// Required: true
-	Message *string `json:"message"`
+	// Min Length: 1
+	Message string `json:"message"`
 }
 
 // Validate validates this error
@@ -41,7 +42,11 @@ func (m *Error) Validate(formats strfmt.Registry) error {
 
 func (m *Error) validateMessage(formats strfmt.Registry) error {
 
-	if err := validate.Required("message", "body", m.Message); err != nil {
+	if err := validate.RequiredString("message", "body", string(m.Message)); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("message", "body", string(m.Message), 1); err != nil {
 		return err
 	}
 

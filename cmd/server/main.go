@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"deploy-wizard/gen/models"
@@ -12,6 +14,7 @@ import (
 	"deploy-wizard/gen/restapi/operations/general"
 	"deploy-wizard/gen/restapi/operations/validations"
 	"deploy-wizard/pkg/application"
+	"deploy-wizard/pkg/git"
 	"deploy-wizard/pkg/metrics"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -19,11 +22,29 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	envUsernameVar      = "KRUISE_STASH_USERNAME"
+	envPasswordVar      = "KRUISE_STASH_PASSWORD"
+	codeRenderError     = 101
+	codeRepoCloneError  = 301
+	codeRepoCommitError = 302
+	codeRepoPushError   = 303
+)
+
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
 	var metricsPortFlag = flag.Int("metrics-port", 9802, "Metrics port")
+
+	stashUser := os.Getenv(envUsernameVar)
+	if stashUser == "" {
+		log.Fatalf("set a valid username for stash in a an environment variable called %s", envUsernameVar)
+	}
+	stashPassword := os.Getenv(envPasswordVar)
+	if stashPassword == "" {
+		log.Fatalf("set a valid password for stash in a an environment variable called %s", envPasswordVar)
+	}
 
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
@@ -70,7 +91,8 @@ func main() {
 
 			rendered, err := renderer.RenderApplication(app)
 			if err != nil {
-				return apps.NewPreviewAppDefault(500).WithPayload(err.Error())
+				errResp := &models.Error{Code: codeRenderError, Message: err.Error()}
+				return apps.NewPreviewAppDefault(500).WithPayload(errResp)
 			}
 
 			metrics.AppsRenderedCount.WithLabelValues(app.Name).Inc()
@@ -79,7 +101,55 @@ func main() {
 
 	api.AppsReleaseAppHandler = apps.ReleaseAppHandlerFunc(
 		func(params apps.ReleaseAppParams) middleware.Responder {
-			validationErrors := application.ValidateApplication(params.Application)
+			if params.Application == nil {
+				return apps.NewReleaseAppBadRequest().WithPayload(&models.ValidationResponse{
+					Errors: map[string]interface{}{
+						"application": fmt.Sprintf("%q is required", "application"),
+					},
+				})
+			}
+
+			app := application.ApplyDefaults(params.Application)
+			validationErrors := application.ValidateApplication(app)
+
+			if len(validationErrors) > 0 {
+				return apps.NewReleaseAppBadRequest().WithPayload(&models.ValidationResponse{Errors: validationErrors})
+			}
+
+			rendered, err := renderer.RenderManifests(app)
+			if err != nil {
+				errResp := &models.Error{Code: codeRenderError, Message: err.Error()}
+				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
+			}
+
+			repo := git.NewRepo(app.RepoURL.String(), app.Path, app.TargetRevision, &git.RepoCreds{
+				Username: stashUser,
+				Password: stashPassword,
+			})
+
+			err = repo.Clone()
+			if err != nil {
+				errResp := &models.Error{Code: codeRepoCloneError, Message: err.Error()}
+				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
+			}
+
+			for filename, content := range rendered {
+				log.Infof("adding file %q (%d bytes)", filename, len(content))
+				repo.AddFile(filename, content)
+			}
+
+			err = repo.Commit(fmt.Sprintf("kruise release for %s:%s", app.Name, app.Release))
+			if err != nil {
+				errResp := &models.Error{Code: codeRepoCommitError, Message: err.Error()}
+				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
+			}
+
+			err = repo.Push()
+			if err != nil {
+				errResp := &models.Error{Code: codeRepoPushError, Message: err.Error()}
+				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
+			}
+
 			return apps.NewReleaseAppCreated().WithPayload(&models.ValidationResponse{Errors: validationErrors})
 		})
 

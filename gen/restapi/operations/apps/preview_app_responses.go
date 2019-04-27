@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "deploy-wizard/gen/models"
 )
 
 // PreviewAppCreatedCode is the HTTP code returned for type PreviewAppCreated
@@ -107,7 +109,7 @@ type PreviewAppDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewPreviewAppDefault creates PreviewAppDefault with default headers values
@@ -133,13 +135,13 @@ func (o *PreviewAppDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the preview app default response
-func (o *PreviewAppDefault) WithPayload(payload string) *PreviewAppDefault {
+func (o *PreviewAppDefault) WithPayload(payload *models.Error) *PreviewAppDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the preview app default response
-func (o *PreviewAppDefault) SetPayload(payload string) {
+func (o *PreviewAppDefault) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
@@ -147,9 +149,10 @@ func (o *PreviewAppDefault) SetPayload(payload string) {
 func (o *PreviewAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(o._statusCode)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }

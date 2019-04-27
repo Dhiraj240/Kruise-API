@@ -39,11 +39,6 @@ func TestClone(t *testing.T) {
 
 	repo.AddFile("test.txt", "Heyo world\n")
 
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
-
 	err = repo.Commit("testing repo with test.txt")
 	if err != nil {
 		t.Error(err)
