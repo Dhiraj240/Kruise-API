@@ -15,9 +15,10 @@ import (
 )
 
 var templates = map[string][]string{
-	"app":        {"service-account.yaml"},
-	"services":   {"service.yaml"},
-	"deployment": {"deployment.yaml"},
+	"app":           {"service-account.yaml"},
+	"services":      {"service.yaml"},
+	"deployment":    {"deployment.yaml"},
+	"kustomization": {"kustomization.yaml"},
 }
 
 var errTemplateUnreadableFormat = "the %q template must exist and be readable"
@@ -37,6 +38,25 @@ func NewRenderer(templateDir string) (*Renderer, error) {
 	// TODO: error if required templates do not exist?
 
 	return &Renderer{templateDir}, nil
+}
+
+// BuildKustomization builds a kustomization file
+func (r *Renderer) BuildKustomization(resources []string) (string, error) {
+	data := struct {
+		Resources []string
+	}{Resources: resources}
+
+	templateFile, err := templateFile(r.templateDir, templates["kustomization"][0])
+	if err != nil {
+		return "", errors.Wrapf(err, errTemplateUnreadableFormat)
+	}
+
+	result, err := renderTemplate(templateFile, data)
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
 }
 
 // RenderManifests renders an application to individual Kubernetes manifest files
@@ -72,6 +92,18 @@ func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, 
 	for filename, content := range deploymentResults {
 		manifests[filename] = content
 	}
+
+	var resources []string
+	for filename := range manifests {
+		resources = append(resources, filename)
+	}
+
+	log.Infof("manifest files: %v", resources)
+	kustomizeFile, err := r.BuildKustomization(resources)
+	if err != nil {
+		return manifests, err
+	}
+	manifests[templates["kustomization"][0]] = kustomizeFile
 
 	return manifests, nil
 }
