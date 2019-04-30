@@ -49,13 +49,17 @@ spec:
           name: ca-bundles
           readOnly: true
         ports:
-        {{- range $.Service.Ports }}
-        - name: {{.Name}}
-          {{- if .TargetPort }}
-          containerPort: {{.TargetPort}}
+        {{- range $containerPort := .Ports }}
+        {{- range $servicePort := $.Service.Ports }}
+        {{- if eq $containerPort $servicePort.Name}}
+        - name: {{$servicePort.Name}}
+          {{- if $servicePort.TargetPort }}
+          containerPort: {{$servicePort.TargetPort}}
           {{- else }}
-          containerPort: {{.Port}}
+          containerPort: {{$servicePort.Port}}
           {{- end }}
-          protocol: {{.Protocol}}
+          protocol: {{$servicePort.Protocol}}
+        {{- end }}
+        {{- end }}
         {{- end }}
       {{- end }}

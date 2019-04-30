@@ -293,6 +293,12 @@ func init() {
           "type": "string",
           "minLength": 1,
           "x-nullable": false
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -778,6 +784,12 @@ func init() {
           "type": "string",
           "minLength": 1,
           "x-nullable": false
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

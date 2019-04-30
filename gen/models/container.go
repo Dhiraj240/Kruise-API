@@ -38,6 +38,9 @@ type Container struct {
 	// The name of this container within the service
 	// Min Length: 1
 	Name string `json:"name,omitempty"`
+
+	// ports
+	Ports []string `json:"ports"`
 }
 
 // Validate validates this container

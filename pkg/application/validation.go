@@ -174,6 +174,10 @@ func ValidateContainer(container *models.Container) map[string]interface{} {
 		errors["imageTag"] = newRequiredValidationError("imageTag")
 	}
 
+	if len(container.Ports) == 0 {
+		errors["ports"] = newRequiredValidationError("ports")
+	}
+
 	return errors
 }
 
