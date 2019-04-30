@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"net/http"
@@ -34,16 +35,41 @@ const (
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
+	var (
+		stashUserFile     string
+		stashUser         string
+		stashPasswordFile string
+		stashPassword     string
+	)
+
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
 	var metricsPortFlag = flag.Int("metrics-port", 9802, "Metrics port")
+	flag.StringVar(&stashUserFile, "username-file", "", "Path to a file that contains the stash username")
+	flag.StringVar(&stashPasswordFile, "password-file", "", "Path to a file that contains the stash password")
 
-	stashUser := os.Getenv(envUsernameVar)
-	if stashUser == "" {
-		log.Fatalf("set a valid username for stash in a an environment variable called %s", envUsernameVar)
+	// parse flags
+	flag.Parse()
+
+	if stashUserFile != "" {
+		stashUser = loadFromFile(stashUserFile)
 	}
-	stashPassword := os.Getenv(envPasswordVar)
+
+	if stashUser == "" {
+		stashUser = os.Getenv(envUsernameVar)
+		if stashUser == "" {
+			log.Fatalf("set a valid username for stash in a an environment variable called %s", envUsernameVar)
+		}
+	}
+
+	if stashPasswordFile != "" {
+		stashPassword = loadFromFile(stashPasswordFile)
+	}
+
 	if stashPassword == "" {
-		log.Fatalf("set a valid password for stash in a an environment variable called %s", envPasswordVar)
+		stashPassword = os.Getenv(envPasswordVar)
+		if stashPassword == "" {
+			log.Fatalf("set a valid password for stash in a an environment variable called %s", envPasswordVar)
+		}
 	}
 
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
@@ -59,8 +85,6 @@ func main() {
 		_ = server.Shutdown()
 	}()
 
-	// parse flags
-	flag.Parse()
 	// set the port this service will be run on
 	server.Port = *portFlag
 
@@ -163,4 +187,17 @@ func main() {
 	if err := server.Serve(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func loadFromFile(filename string) string {
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Warnf("could not open file %q: %s", filename, err.Error())
+		return ""
+	}
+	defer func() { _ = f.Close() }()
+
+	s := bufio.NewScanner(f)
+	s.Scan()
+	return s.Text()
 }
