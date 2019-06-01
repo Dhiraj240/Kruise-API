@@ -1,9 +1,11 @@
 package git
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,7 +14,8 @@ import (
 	"gopkg.in/src-d/go-billy.v4/memfs"
 	gitclient "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	gittransport "gopkg.in/src-d/go-git.v4/plumbing/transport/client"
+	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 )
 
@@ -44,7 +47,15 @@ type RepoCreds struct {
 }
 
 // NewRepo creates a new instance of a repo
-func NewRepo(repoURL, prefix, ref string, creds *RepoCreds) *Repo {
+func NewRepo(repoURL, prefix, ref string, creds *RepoCreds, insecureSkipVerify bool) *Repo {
+	customClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+		},
+	}
+
+	gittransport.InstallProtocol("https", githttp.NewClient(customClient))
+
 	return &Repo{
 		repoURL: repoURL,
 		creds:   creds,
@@ -59,7 +70,7 @@ func NewRepo(repoURL, prefix, ref string, creds *RepoCreds) *Repo {
 func (r *Repo) Clone() error {
 	gitrepo, err := gitclient.Clone(memory.NewStorage(), r.fs, &gitclient.CloneOptions{
 		URL: r.repoURL,
-		Auth: &http.BasicAuth{
+		Auth: &githttp.BasicAuth{
 			Username: r.creds.Username,
 			Password: r.creds.Password,
 		},
@@ -134,7 +145,7 @@ func (r *Repo) Commit(msg string) error {
 // Push pushes the repository
 func (r *Repo) Push() error {
 	if err := r.r.Push(&gitclient.PushOptions{
-		Auth: &http.BasicAuth{
+		Auth: &githttp.BasicAuth{
 			Username: r.creds.Username,
 			Password: r.creds.Password,
 		},

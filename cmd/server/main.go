@@ -36,19 +36,25 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
 	var (
-		stashUserFile     string
-		stashUser         string
-		stashPasswordFile string
-		stashPassword     string
+		stashUserFile         string
+		stashUser             string
+		stashPasswordFile     string
+		stashPassword         string
+		gitInsecureSkipVerify bool
 	)
 
 	var portFlag = flag.Int("port", 9801, "Port to run this service on")
 	var metricsPortFlag = flag.Int("metrics-port", 9802, "Metrics port")
+	flag.BoolVar(&gitInsecureSkipVerify, "git-insecure-skip-verify", false, "If true, will ignore TLS verification errors (insecure)")
 	flag.StringVar(&stashUserFile, "username-file", "", "Path to a file that contains the stash username")
 	flag.StringVar(&stashPasswordFile, "password-file", "", "Path to a file that contains the stash password")
 
 	// parse flags
 	flag.Parse()
+
+	if gitInsecureSkipVerify {
+		log.Warn("Ignoring TLS verification errors")
+	}
 
 	if stashUserFile != "" {
 		stashUser = loadFromFile(stashUserFile)
@@ -149,7 +155,7 @@ func main() {
 			repo := git.NewRepo(app.RepoURL.String(), app.Path, app.TargetRevision, &git.RepoCreds{
 				Username: stashUser,
 				Password: stashPassword,
-			})
+			}, gitInsecureSkipVerify)
 
 			err = repo.Clone()
 			if err != nil {
