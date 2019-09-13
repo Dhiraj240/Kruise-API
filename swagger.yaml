@@ -12,26 +12,25 @@ info:
   version: 0.0.1
 
 consumes:
-- "application/json"
+  - "application/json"
 
 produces:
-- "application/json"
+  - "application/json"
 
 paths:
-
   /app/validation:
     post:
       tags:
-      - validations
+        - validations
       operationId: validateApplication
       description: Validates the Kruise application
       parameters:
-      - name: application
-        in: body
-        description: the application object
-        required: true
-        schema:
-          type: object
+        - name: application
+          in: body
+          description: the application object
+          required: true
+          schema:
+            type: object
       responses:
         200:
           description: validated
@@ -45,18 +44,18 @@ paths:
   /app/preview:
     post:
       tags:
-      - apps
+        - apps
       operationId: previewApp
       description: Previews a new Kruise application
       parameters:
-      - name: application
-        in: body
-        description: The application to preview
-        required: true
-        schema:
-          $ref: "#/definitions/application"
+        - name: application
+          in: body
+          description: The application to preview
+          required: true
+          schema:
+            $ref: "#/definitions/application"
       produces:
-      - "text/plain"
+        - "text/plain"
       responses:
         201:
           description: created
@@ -70,16 +69,16 @@ paths:
   /app/release:
     post:
       tags:
-      - apps
+        - apps
       operationId: releaseApp
       description: Generates a new Kruise application
       parameters:
-      - name: application
-        in: body
-        description: The application to generate
-        required: true
-        schema:
-          $ref: "#/definitions/application"
+        - name: application
+          in: body
+          description: The application to generate
+          required: true
+          schema:
+            $ref: "#/definitions/application"
       responses:
         201:
           description: created
@@ -95,7 +94,7 @@ paths:
   /health:
     get:
       tags:
-      - general
+        - general
       operationId: getHealth
       description: Get the current health of the API
       responses:
@@ -109,7 +108,6 @@ paths:
             $ref: "#/definitions/error"
 
 responses:
-
   BadRequest:
     description: Bad request
     schema:
@@ -121,8 +119,18 @@ responses:
       $ref: "#/definitions/error"
 
 definitions:
-
   application:
+    type: object
+    properties:
+      metadata:
+        $ref: "#/definitions/metadata"
+      spec:
+        $ref: "#/definitions/spec"
+    required:
+      - metadata
+      - spec
+
+  metadata:
     type: object
     properties:
       name:
@@ -130,17 +138,33 @@ definitions:
         description: The name of the application
         minLength: 1
         x-nullable: false
-      release:
+      namespace:
+        type: string
+        description: The namespace to deploy to
+        minLength: 1
+        x-nullable: false
+      labels:
+        $ref: "#/definitions/labels"
+        description: Arbitrary labels
+    required:
+      - name
+      - namespace
+      - labels
+
+  labels:
+    type: object
+    properties:
+      version:
         type: string
         description: The version or release name of the application
         minLength: 1
         x-nullable: false
-      tenant:
+      team:
         type: string
-        description: The name of the tenant
+        description: The name of the team or tenant
         minLength: 1
         x-nullable: false
-      environment:
+      env:
         type: string
         description: The environment to deploy to
         minLength: 1
@@ -148,9 +172,9 @@ definitions:
         # TODO: consider making environments configurable
         default: Dev
         enum:
-        - Dev
-        - Stage
-        - Prod
+          - Dev
+          - Stage
+          - Prod
       region:
         type: string
         description: The region to deploy to
@@ -159,15 +183,40 @@ definitions:
         # TODO: consider making regions configurable
         default: STL
         enum:
-        - STL
-        - KCI
-        - BEL
-      namespace:
-        type: string
-        description: The namespace to deploy to
-        minLength: 1
-        x-nullable: false
-      repoURL:
+          - STL
+          - KCI
+          - BEL
+    required:
+      - version
+      - team
+      - env
+      - region
+
+  spec:
+    type: object
+    properties:
+      destination:
+        $ref: "#/definitions/destination"
+      configMaps:
+        type: array
+        items:
+          $ref: "#/definitions/configMap"
+      persistentVolumes:
+        type: array
+        items:
+          $ref: "#/definitions/persistentVolume"
+      components:
+        type: array
+        items:
+          $ref: "#/definitions/component"
+    required:
+      - destination
+      - components
+
+  destination:
+    type: object
+    properties:
+      url:
         type: string
         description: The git repo URL
         minLength: 1
@@ -186,20 +235,25 @@ definitions:
         minLength: 1
         x-nullable: false
         default: HEAD
-      services:
+    required:
+      - url
+
+  component:
+    type: object
+    properties:
+      service:
+        $ref: "#/definitions/service"
+      ingresses:
         type: array
         items:
-          $ref: "#/definitions/service"
-      ingress:
-        $ref: "#/definitions/ingress"
+          $ref: "#/definitions/ingress"
+      containers:
+        type: array
+        items:
+          $ref: "#/definitions/container"
     required:
-    - name
-    - release
-    - tenant
-    - environment
-    - region
-    - namespace
-    - repoURL
+      - service
+      - containers
 
   service:
     type: object
@@ -215,31 +269,17 @@ definitions:
         x-nullable: false
         # TODO: needs to be configurable
         enum:
-        - ClusterIP
-        - ExternalName
-        - LoadBalancer
-      tier:
-        type: string
-        description: The tier for the service
-        x-nullable: true
-        # TODO: needs to be configurable
-        enum:
-        - Frontend
-        - API
-        - Backend
-        - Cache
+          - ClusterIP
+          - ExternalName
+          - LoadBalancer
       ports:
         type: array
         items:
           $ref: "#/definitions/servicePort"
-      containers:
-        type: array
-        items:
-          $ref: "#/definitions/container"
     required:
-    - name
-    - type
-    - ports
+      - name
+      - type
+      - ports
 
   servicePort:
     type: object
@@ -260,16 +300,16 @@ definitions:
         x-nullable: false
         default: TCP
         enum:
-        - TCP
-        - UDP
+          - TCP
+          - UDP
       targetPort:
         type: string
         description: Number or name of the port to access on the pods targeted by the service
         minLength: 1
         x-nullable: false
     required:
-    - name
-    - port
+      - name
+      - port
 
   container:
     type: object
@@ -296,59 +336,148 @@ definitions:
         x-nullable: false
         default: IfNotPresent
         enum:
-        - Always
-        - IfNotPresent
-      ports:
-        type: array
-        items:
-          type: string
+          - Always
+          - IfNotPresent
       command:
         type: string
         description: The command to run for the docker image's entrypoint.
         # minLength: 1
         x-nullable: true
+      portNames:
+        type: array
+        items:
+          type: string
+      volumes:
+        type: array
+        items:
+          $ref: "#/definitions/volumeMount"
+    required:
+      - name
+      - image
+      - imageTag
+      - imagePullPolicy
+      - portNames
 
-  ingress:
+  volumeMount:
     type: object
     properties:
       name:
         type: string
-        description: The name of the ingress
+        description: The name of the volume to mount
         minLength: 1
         x-nullable: false
-      rules:
-        type: array
-        items:
-          $ref: "#/definitions/ingressRule"
-    required:
-    - name
-    - rules
+      type:
+        type: string
+        description: The type of the volume mount (ConfigMap, PersistentVolume, or Secret)
+        minLength: 1
+        x-nullable: false
+        enum:
+          - ConfigMap
+          - PersistentVolume
+          - Secret
+      mountPath:
+        type: string
+        description: Path within the container at which the volume should be mounted
+        minLength: 1
+        x-nullable: false
+      subPath:
+        type: string
+        description: Path within the volume from which the container's volume should be mounted
+        default: ""
+        x-nullable: true
+      readOnly:
+        type: boolean
+        description: Mounted read-only if true, read-write otherwise
+        default: false
+        x-nullable: false
 
-  ingressRule:
+  ingress:
     type: object
     properties:
       host:
         type: string
-        description: Host is the fully qualified domain name of a network host, as defined by RFC 3986
+        description: The hostname for the ingress
         minLength: 1
         x-nullable: false
+      paths:
+        type: array
+        items:
+          $ref: "#/definitions/ingressPath"
+    required:
+      - host
+      - paths
+
+  ingressPath:
+    type: object
+    properties:
       path:
         type: string
-        description: Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request
-      serviceName:
-        type: string
-        description: Specifies the name of the referenced service
+        description: Path is matched against the path of an incoming request
         minLength: 1
+        default: "/"
         x-nullable: false
-      servicePort:
+      portName:
         type: string
-        description: Specifies the port of the referenced service
+        description: Specifies the port name of the service to expose
         minLength: 1
         x-nullable: false
     required:
-    - host
-    - serviceName
-    - servicePort
+      - path
+      - portName
+
+  configMap:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the ConfigMap
+        minLength: 1
+        x-nullable: false
+      # TODO: this should be kvps instead of hardcorded data kvp
+      data:
+        type: string
+        description: The content of the ConfigMap data key
+        minLength: 1
+        x-nullable: false
+    required:
+      - name
+
+  persistentVolume:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the volume
+        minLength: 1
+        x-nullable: false
+      accessMode:
+        type: string
+        description: The desired access mode for the volume
+        minLength: 1
+        x-nullable: false
+        default: ReadWriteOnce
+        enum:
+          - ReadWriteOnce
+          - ReadOnlyMany
+          - ReadWriteMany
+      capacity:
+        type: integer
+        description: The desired size of the volume in GB
+        format: int64
+      storageClassName:
+        type: string
+        description: The desired storage class for the volume
+        minLength: 1
+        x-nullable: false
+        default: SSD
+        enum:
+          - SSD
+          - NFS
+    required:
+      - name
+      - accessMode
+      - capacity
+      - storageClassName
 
   healthStatus:
     type: object
@@ -367,7 +496,7 @@ definitions:
   error:
     type: object
     required:
-    - message
+      - message
     properties:
       code:
         type: integer

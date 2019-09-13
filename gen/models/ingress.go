@@ -19,25 +19,25 @@ import (
 // swagger:model ingress
 type Ingress struct {
 
-	// The name of the ingress
+	// The hostname for the ingress
 	// Required: true
 	// Min Length: 1
-	Name string `json:"name"`
+	Host string `json:"host"`
 
-	// rules
+	// paths
 	// Required: true
-	Rules []*IngressRule `json:"rules"`
+	Paths []*IngressPath `json:"paths"`
 }
 
 // Validate validates this ingress
 func (m *Ingress) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateName(formats); err != nil {
+	if err := m.validateHost(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateRules(formats); err != nil {
+	if err := m.validatePaths(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -47,34 +47,34 @@ func (m *Ingress) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Ingress) validateName(formats strfmt.Registry) error {
+func (m *Ingress) validateHost(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
+	if err := validate.RequiredString("host", "body", string(m.Host)); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
+	if err := validate.MinLength("host", "body", string(m.Host), 1); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *Ingress) validateRules(formats strfmt.Registry) error {
+func (m *Ingress) validatePaths(formats strfmt.Registry) error {
 
-	if err := validate.Required("rules", "body", m.Rules); err != nil {
+	if err := validate.Required("paths", "body", m.Paths); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.Rules); i++ {
-		if swag.IsZero(m.Rules[i]) { // not required
+	for i := 0; i < len(m.Paths); i++ {
+		if swag.IsZero(m.Paths[i]) { // not required
 			continue
 		}
 
-		if m.Rules[i] != nil {
-			if err := m.Rules[i].Validate(formats); err != nil {
+		if m.Paths[i] != nil {
+			if err := m.Paths[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("rules" + "." + strconv.Itoa(i))
+					return ve.ValidateName("paths" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

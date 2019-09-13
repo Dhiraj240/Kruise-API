@@ -20,9 +20,6 @@ import (
 // swagger:model service
 type Service struct {
 
-	// containers
-	Containers []*Container `json:"containers"`
-
 	// The name of the service
 	// Required: true
 	// Min Length: 1
@@ -31,10 +28,6 @@ type Service struct {
 	// ports
 	// Required: true
 	Ports []*ServicePort `json:"ports"`
-
-	// The tier for the service
-	// Enum: [Frontend API Backend Cache]
-	Tier *string `json:"tier,omitempty"`
 
 	// The service type
 	// Required: true
@@ -46,19 +39,11 @@ type Service struct {
 func (m *Service) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateContainers(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validatePorts(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTier(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -69,31 +54,6 @@ func (m *Service) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *Service) validateContainers(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Containers) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.Containers); i++ {
-		if swag.IsZero(m.Containers[i]) { // not required
-			continue
-		}
-
-		if m.Containers[i] != nil {
-			if err := m.Containers[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("containers" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -130,55 +90,6 @@ func (m *Service) validatePorts(formats strfmt.Registry) error {
 			}
 		}
 
-	}
-
-	return nil
-}
-
-var serviceTypeTierPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["Frontend","API","Backend","Cache"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		serviceTypeTierPropEnum = append(serviceTypeTierPropEnum, v)
-	}
-}
-
-const (
-
-	// ServiceTierFrontend captures enum value "Frontend"
-	ServiceTierFrontend string = "Frontend"
-
-	// ServiceTierAPI captures enum value "API"
-	ServiceTierAPI string = "API"
-
-	// ServiceTierBackend captures enum value "Backend"
-	ServiceTierBackend string = "Backend"
-
-	// ServiceTierCache captures enum value "Cache"
-	ServiceTierCache string = "Cache"
-)
-
-// prop value enum
-func (m *Service) validateTierEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, serviceTypeTierPropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Service) validateTier(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tier) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := m.validateTierEnum("tier", "body", *m.Tier); err != nil {
-		return err
 	}
 
 	return nil

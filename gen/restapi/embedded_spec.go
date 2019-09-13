@@ -167,90 +167,56 @@ func init() {
     "application": {
       "type": "object",
       "required": [
-        "name",
-        "release",
-        "tenant",
-        "environment",
-        "region",
-        "namespace",
-        "repoURL"
+        "metadata",
+        "spec"
       ],
       "properties": {
-        "environment": {
-          "description": "The environment to deploy to",
-          "type": "string",
-          "default": "Dev",
-          "minLength": 1,
-          "enum": [
-            "Dev",
-            "Stage",
-            "Prod"
-          ],
-          "x-nullable": false
+        "metadata": {
+          "$ref": "#/definitions/metadata"
         },
-        "ingress": {
-          "$ref": "#/definitions/ingress"
-        },
-        "name": {
-          "description": "The name of the application",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "namespace": {
-          "description": "The namespace to deploy to",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "path": {
-          "description": "The relative path to the manifests in the git repo",
-          "type": "string",
-          "format": "filepath",
-          "default": "/",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "region": {
-          "description": "The region to deploy to",
-          "type": "string",
-          "default": "STL",
-          "minLength": 1,
-          "enum": [
-            "STL",
-            "KCI",
-            "BEL"
-          ],
-          "x-nullable": false
-        },
-        "release": {
-          "description": "The version or release name of the application",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "repoURL": {
-          "description": "The git repo URL",
-          "type": "string",
-          "format": "uri",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "services": {
+        "spec": {
+          "$ref": "#/definitions/spec"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "service",
+        "containers"
+      ],
+      "properties": {
+        "containers": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/service"
+            "$ref": "#/definitions/container"
           }
         },
-        "targetRevision": {
-          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+        "ingresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingress"
+          }
+        },
+        "service": {
+          "$ref": "#/definitions/service"
+        }
+      }
+    },
+    "configMap": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "data": {
+          "description": "The content of the ConfigMap data key",
           "type": "string",
-          "default": "HEAD",
           "minLength": 1,
           "x-nullable": false
         },
-        "tenant": {
-          "description": "The name of the tenant",
+        "name": {
+          "description": "The name of the ConfigMap",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
@@ -259,6 +225,13 @@ func init() {
     },
     "container": {
       "type": "object",
+      "required": [
+        "name",
+        "image",
+        "imageTag",
+        "imagePullPolicy",
+        "portNames"
+      ],
       "properties": {
         "command": {
           "description": "The command to run for the docker image's entrypoint.",
@@ -294,11 +267,47 @@ func init() {
           "minLength": 1,
           "x-nullable": false
         },
-        "ports": {
+        "portNames": {
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/volumeMount"
+          }
+        }
+      }
+    },
+    "destination": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "path": {
+          "description": "The relative path to the manifests in the git repo",
+          "type": "string",
+          "format": "filepath",
+          "default": "/",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "targetRevision": {
+          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+          "type": "string",
+          "default": "HEAD",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "url": {
+          "description": "The git repo URL",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -330,52 +339,160 @@ func init() {
     "ingress": {
       "type": "object",
       "required": [
-        "name",
-        "rules"
+        "host",
+        "paths"
       ],
       "properties": {
-        "name": {
-          "description": "The name of the ingress",
+        "host": {
+          "description": "The hostname for the ingress",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
         },
-        "rules": {
+        "paths": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ingressRule"
+            "$ref": "#/definitions/ingressPath"
           }
         }
       }
     },
-    "ingressRule": {
+    "ingressPath": {
       "type": "object",
       "required": [
-        "host",
-        "serviceName",
-        "servicePort"
+        "path",
+        "portName"
       ],
       "properties": {
-        "host": {
-          "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
         "path": {
-          "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
-          "type": "string"
+          "description": "Path is matched against the path of an incoming request",
+          "type": "string",
+          "default": "/",
+          "minLength": 1,
+          "x-nullable": false
         },
-        "serviceName": {
-          "description": "Specifies the name of the referenced service",
+        "portName": {
+          "description": "Specifies the port name of the service to expose",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "required": [
+        "version",
+        "team",
+        "env",
+        "region"
+      ],
+      "properties": {
+        "env": {
+          "description": "The environment to deploy to",
+          "type": "string",
+          "default": "Dev",
+          "minLength": 1,
+          "enum": [
+            "Dev",
+            "Stage",
+            "Prod"
+          ],
+          "x-nullable": false
+        },
+        "region": {
+          "description": "The region to deploy to",
+          "type": "string",
+          "default": "STL",
+          "minLength": 1,
+          "enum": [
+            "STL",
+            "KCI",
+            "BEL"
+          ],
+          "x-nullable": false
+        },
+        "team": {
+          "description": "The name of the team or tenant",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
         },
-        "servicePort": {
-          "description": "Specifies the port of the referenced service",
+        "version": {
+          "description": "The version or release name of the application",
           "type": "string",
           "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name",
+        "namespace",
+        "labels"
+      ],
+      "properties": {
+        "labels": {
+          "description": "Arbitrary labels",
+          "$ref": "#/definitions/labels"
+        },
+        "name": {
+          "description": "The name of the application",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "namespace": {
+          "description": "The namespace to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "persistentVolume": {
+      "type": "object",
+      "required": [
+        "name",
+        "accessMode",
+        "capacity",
+        "storageClassName"
+      ],
+      "properties": {
+        "accessMode": {
+          "description": "The desired access mode for the volume",
+          "type": "string",
+          "default": "ReadWriteOnce",
+          "minLength": 1,
+          "enum": [
+            "ReadWriteOnce",
+            "ReadOnlyMany",
+            "ReadWriteMany"
+          ],
+          "x-nullable": false
+        },
+        "capacity": {
+          "description": "The desired size of the volume in GB",
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "The name of the volume",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "storageClassName": {
+          "description": "The desired storage class for the volume",
+          "type": "string",
+          "default": "SSD",
+          "minLength": 1,
+          "enum": [
+            "SSD",
+            "NFS"
+          ],
           "x-nullable": false
         }
       }
@@ -388,12 +505,6 @@ func init() {
         "ports"
       ],
       "properties": {
-        "containers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/container"
-          }
-        },
         "name": {
           "description": "The name of the service",
           "type": "string",
@@ -405,17 +516,6 @@ func init() {
           "items": {
             "$ref": "#/definitions/servicePort"
           }
-        },
-        "tier": {
-          "description": "The tier for the service",
-          "type": "string",
-          "enum": [
-            "Frontend",
-            "API",
-            "Backend",
-            "Cache"
-          ],
-          "x-nullable": true
         },
         "type": {
           "description": "The service type",
@@ -466,6 +566,36 @@ func init() {
         }
       }
     },
+    "spec": {
+      "type": "object",
+      "required": [
+        "destination",
+        "components"
+      ],
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/component"
+          }
+        },
+        "configMaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/configMap"
+          }
+        },
+        "destination": {
+          "$ref": "#/definitions/destination"
+        },
+        "persistentVolumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/persistentVolume"
+          }
+        }
+      }
+    },
     "validationResponse": {
       "type": "object",
       "properties": {
@@ -474,6 +604,46 @@ func init() {
           "additionalProperties": {
             "type": "object"
           }
+        }
+      }
+    },
+    "volumeMount": {
+      "type": "object",
+      "properties": {
+        "mountPath": {
+          "description": "Path within the container at which the volume should be mounted",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "name": {
+          "description": "The name of the volume to mount",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "readOnly": {
+          "description": "Mounted read-only if true, read-write otherwise",
+          "type": "boolean",
+          "default": false,
+          "x-nullable": false
+        },
+        "subPath": {
+          "description": "Path within the volume from which the container's volume should be mounted",
+          "type": "string",
+          "default": "",
+          "x-nullable": true
+        },
+        "type": {
+          "description": "The type of the volume mount (ConfigMap, PersistentVolume, or Secret)",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "ConfigMap",
+            "PersistentVolume",
+            "Secret"
+          ],
+          "x-nullable": false
         }
       }
     }
@@ -658,90 +828,56 @@ func init() {
     "application": {
       "type": "object",
       "required": [
-        "name",
-        "release",
-        "tenant",
-        "environment",
-        "region",
-        "namespace",
-        "repoURL"
+        "metadata",
+        "spec"
       ],
       "properties": {
-        "environment": {
-          "description": "The environment to deploy to",
-          "type": "string",
-          "default": "Dev",
-          "minLength": 1,
-          "enum": [
-            "Dev",
-            "Stage",
-            "Prod"
-          ],
-          "x-nullable": false
+        "metadata": {
+          "$ref": "#/definitions/metadata"
         },
-        "ingress": {
-          "$ref": "#/definitions/ingress"
-        },
-        "name": {
-          "description": "The name of the application",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "namespace": {
-          "description": "The namespace to deploy to",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "path": {
-          "description": "The relative path to the manifests in the git repo",
-          "type": "string",
-          "format": "filepath",
-          "default": "/",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "region": {
-          "description": "The region to deploy to",
-          "type": "string",
-          "default": "STL",
-          "minLength": 1,
-          "enum": [
-            "STL",
-            "KCI",
-            "BEL"
-          ],
-          "x-nullable": false
-        },
-        "release": {
-          "description": "The version or release name of the application",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "repoURL": {
-          "description": "The git repo URL",
-          "type": "string",
-          "format": "uri",
-          "minLength": 1,
-          "x-nullable": false
-        },
-        "services": {
+        "spec": {
+          "$ref": "#/definitions/spec"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "service",
+        "containers"
+      ],
+      "properties": {
+        "containers": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/service"
+            "$ref": "#/definitions/container"
           }
         },
-        "targetRevision": {
-          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+        "ingresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ingress"
+          }
+        },
+        "service": {
+          "$ref": "#/definitions/service"
+        }
+      }
+    },
+    "configMap": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "data": {
+          "description": "The content of the ConfigMap data key",
           "type": "string",
-          "default": "HEAD",
           "minLength": 1,
           "x-nullable": false
         },
-        "tenant": {
-          "description": "The name of the tenant",
+        "name": {
+          "description": "The name of the ConfigMap",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
@@ -750,6 +886,13 @@ func init() {
     },
     "container": {
       "type": "object",
+      "required": [
+        "name",
+        "image",
+        "imageTag",
+        "imagePullPolicy",
+        "portNames"
+      ],
       "properties": {
         "command": {
           "description": "The command to run for the docker image's entrypoint.",
@@ -785,11 +928,47 @@ func init() {
           "minLength": 1,
           "x-nullable": false
         },
-        "ports": {
+        "portNames": {
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/volumeMount"
+          }
+        }
+      }
+    },
+    "destination": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "path": {
+          "description": "The relative path to the manifests in the git repo",
+          "type": "string",
+          "format": "filepath",
+          "default": "/",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "targetRevision": {
+          "description": "Defines the commit, tag, or branch in which to sync the application to.",
+          "type": "string",
+          "default": "HEAD",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "url": {
+          "description": "The git repo URL",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1,
+          "x-nullable": false
         }
       }
     },
@@ -821,52 +1000,160 @@ func init() {
     "ingress": {
       "type": "object",
       "required": [
-        "name",
-        "rules"
+        "host",
+        "paths"
       ],
       "properties": {
-        "name": {
-          "description": "The name of the ingress",
+        "host": {
+          "description": "The hostname for the ingress",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
         },
-        "rules": {
+        "paths": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ingressRule"
+            "$ref": "#/definitions/ingressPath"
           }
         }
       }
     },
-    "ingressRule": {
+    "ingressPath": {
       "type": "object",
       "required": [
-        "host",
-        "serviceName",
-        "servicePort"
+        "path",
+        "portName"
       ],
       "properties": {
-        "host": {
-          "description": "Host is the fully qualified domain name of a network host, as defined by RFC 3986",
-          "type": "string",
-          "minLength": 1,
-          "x-nullable": false
-        },
         "path": {
-          "description": "Path is an extended POSIX regex as defined by IEEE Std 1003.1, (i.e this follows the egrep/unix syntax, not the perl syntax) matched against the path of an incoming request",
-          "type": "string"
+          "description": "Path is matched against the path of an incoming request",
+          "type": "string",
+          "default": "/",
+          "minLength": 1,
+          "x-nullable": false
         },
-        "serviceName": {
-          "description": "Specifies the name of the referenced service",
+        "portName": {
+          "description": "Specifies the port name of the service to expose",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "required": [
+        "version",
+        "team",
+        "env",
+        "region"
+      ],
+      "properties": {
+        "env": {
+          "description": "The environment to deploy to",
+          "type": "string",
+          "default": "Dev",
+          "minLength": 1,
+          "enum": [
+            "Dev",
+            "Stage",
+            "Prod"
+          ],
+          "x-nullable": false
+        },
+        "region": {
+          "description": "The region to deploy to",
+          "type": "string",
+          "default": "STL",
+          "minLength": 1,
+          "enum": [
+            "STL",
+            "KCI",
+            "BEL"
+          ],
+          "x-nullable": false
+        },
+        "team": {
+          "description": "The name of the team or tenant",
           "type": "string",
           "minLength": 1,
           "x-nullable": false
         },
-        "servicePort": {
-          "description": "Specifies the port of the referenced service",
+        "version": {
+          "description": "The version or release name of the application",
           "type": "string",
           "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name",
+        "namespace",
+        "labels"
+      ],
+      "properties": {
+        "labels": {
+          "description": "Arbitrary labels",
+          "$ref": "#/definitions/labels"
+        },
+        "name": {
+          "description": "The name of the application",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "namespace": {
+          "description": "The namespace to deploy to",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        }
+      }
+    },
+    "persistentVolume": {
+      "type": "object",
+      "required": [
+        "name",
+        "accessMode",
+        "capacity",
+        "storageClassName"
+      ],
+      "properties": {
+        "accessMode": {
+          "description": "The desired access mode for the volume",
+          "type": "string",
+          "default": "ReadWriteOnce",
+          "minLength": 1,
+          "enum": [
+            "ReadWriteOnce",
+            "ReadOnlyMany",
+            "ReadWriteMany"
+          ],
+          "x-nullable": false
+        },
+        "capacity": {
+          "description": "The desired size of the volume in GB",
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "The name of the volume",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "storageClassName": {
+          "description": "The desired storage class for the volume",
+          "type": "string",
+          "default": "SSD",
+          "minLength": 1,
+          "enum": [
+            "SSD",
+            "NFS"
+          ],
           "x-nullable": false
         }
       }
@@ -879,12 +1166,6 @@ func init() {
         "ports"
       ],
       "properties": {
-        "containers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/container"
-          }
-        },
         "name": {
           "description": "The name of the service",
           "type": "string",
@@ -896,17 +1177,6 @@ func init() {
           "items": {
             "$ref": "#/definitions/servicePort"
           }
-        },
-        "tier": {
-          "description": "The tier for the service",
-          "type": "string",
-          "enum": [
-            "Frontend",
-            "API",
-            "Backend",
-            "Cache"
-          ],
-          "x-nullable": true
         },
         "type": {
           "description": "The service type",
@@ -957,6 +1227,36 @@ func init() {
         }
       }
     },
+    "spec": {
+      "type": "object",
+      "required": [
+        "destination",
+        "components"
+      ],
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/component"
+          }
+        },
+        "configMaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/configMap"
+          }
+        },
+        "destination": {
+          "$ref": "#/definitions/destination"
+        },
+        "persistentVolumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/persistentVolume"
+          }
+        }
+      }
+    },
     "validationResponse": {
       "type": "object",
       "properties": {
@@ -965,6 +1265,46 @@ func init() {
           "additionalProperties": {
             "type": "object"
           }
+        }
+      }
+    },
+    "volumeMount": {
+      "type": "object",
+      "properties": {
+        "mountPath": {
+          "description": "Path within the container at which the volume should be mounted",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "name": {
+          "description": "The name of the volume to mount",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": false
+        },
+        "readOnly": {
+          "description": "Mounted read-only if true, read-write otherwise",
+          "type": "boolean",
+          "default": false,
+          "x-nullable": false
+        },
+        "subPath": {
+          "description": "Path within the volume from which the container's volume should be mounted",
+          "type": "string",
+          "default": "",
+          "x-nullable": true
+        },
+        "type": {
+          "description": "The type of the volume mount (ConfigMap, PersistentVolume, or Secret)",
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "ConfigMap",
+            "PersistentVolume",
+            "Secret"
+          ],
+          "x-nullable": false
         }
       }
     }
