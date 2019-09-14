@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"deploy-wizard/gen/models"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -118,9 +119,9 @@ func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 
 	// render in a specific order
 	results = append(results, manifests["service-account.yaml"])
-	for _, service := range app.Services {
-		results = append(results, manifests[serviceName(service)])
-		results = append(results, manifests[deploymentName(service)])
+	for _, component := range app.Spec.Components {
+		results = append(results, manifests[serviceName(component.Service)])
+		results = append(results, manifests[deploymentName(component.Service)])
 	}
 
 	return strings.Join(results, "\n\n---\n"), nil
@@ -140,7 +141,8 @@ func (r *Renderer) renderServices(app *models.Application) (map[string]string, e
 			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
 		}
 
-		for _, service := range app.Services {
+		for _, component := range app.Spec.Components {
+			service := component.Service
 			log.Infof("rendering %q", templateFile)
 			data.Service = service
 			result, err := renderTemplate(templateFile, data)
@@ -169,15 +171,15 @@ func (r *Renderer) renderDeployments(app *models.Application) (map[string]string
 			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
 		}
 
-		for _, service := range app.Services {
+		for _, component := range app.Spec.Components {
 			log.Infof("rendering %q", templateFile)
-			data.Service = service
-			data.Containers = service.Containers
+			data.Service = component.Service
+			data.Containers = component.Containers
 			result, err := renderTemplate(templateFile, data)
 			if err != nil {
 				return manifests, err
 			}
-			manifests[deploymentName(service)] = result
+			manifests[deploymentName(component.Service)] = result
 		}
 	}
 

@@ -560,8 +560,7 @@ func init() {
         },
         "targetPort": {
           "description": "Number or name of the port to access on the pods targeted by the service",
-          "type": "string",
-          "minLength": 1,
+          "type": "integer",
           "x-nullable": false
         }
       }
@@ -1221,8 +1220,7 @@ func init() {
         },
         "targetPort": {
           "description": "Number or name of the port to access on the pods targeted by the service",
-          "type": "string",
-          "minLength": 1,
+          "type": "integer",
           "x-nullable": false
         }
       }

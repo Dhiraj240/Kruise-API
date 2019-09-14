@@ -6,6 +6,7 @@ import (
 
 	"deploy-wizard/gen/models"
 	"deploy-wizard/pkg/application"
+
 	"github.com/andreyvit/diff"
 	"github.com/go-openapi/strfmt"
 )
@@ -17,48 +18,61 @@ func defaultTier() *string {
 
 var (
 	validApplication = &models.Application{
-		Name:           "app1",
-		Release:        "v1",
-		Tenant:         "tenant1",
-		Environment:    "Dev",
-		Region:         "STL",
-		Namespace:      "tenant1",
-		RepoURL:        strfmt.URI("https://fusion.mastercard.int/stash/scm/ce/fake-repo.git/"),
-		Path:           "/",
-		TargetRevision: "HEAD",
-		Services: []*models.Service{
-			{
-				Name: "app1",
-				Tier: defaultTier(),
-				Ports: []*models.ServicePort{
-					{
-						Name: "http",
-						Port: 8080,
-					},
-					{
-						Name:       "metrics",
-						Port:       8081,
-						TargetPort: "8090",
-						Protocol:   "TCP",
-					},
-				},
-				Containers: []*models.Container{
-					{
-						Name:            "app1",
-						Image:           "nginx",
-						ImagePullPolicy: "IfNotPresent",
-						ImageTag:        "alpine",
-					},
-				},
+		Metadata: &models.Metadata{
+			Name:      "app1",
+			Namespace: "tenant1",
+			Labels: &models.Labels{
+				Version: "v1",
+				Team:    "tenant1",
+				Env:     "Dev",
+				Region:  "STL",
 			},
 		},
-		Ingress: &models.Ingress{
-			Name: "app1-ingress",
-			Rules: []*models.IngressRule{
+		Spec: &models.Spec{
+			Destination: &models.Destination{
+				URL:            strfmt.URI("https://fusion.mastercard.int/stash/scm/ce/fake-repo.git/"),
+				Path:           "/",
+				TargetRevision: "HEAD",
+			},
+			ConfigMaps:        []*models.ConfigMap{},
+			PersistentVolumes: []*models.PersistentVolume{},
+			Components: []*models.Component{
 				{
-					Host:        "app1.mc.int",
-					ServiceName: "app1",
-					ServicePort: "http",
+					Service: &models.Service{
+						Name: "app1",
+						Type: "ClusterIP",
+						Ports: []*models.ServicePort{
+							{
+								Name: "http",
+								Port: 8080,
+							},
+							{
+								Name:       "metrics",
+								Port:       8081,
+								TargetPort: "8090",
+								Protocol:   "TCP",
+							},
+						},
+					},
+					Containers: []*models.Container{
+						{
+							Name:            "app1",
+							Image:           "nginx",
+							ImagePullPolicy: "IfNotPresent",
+							ImageTag:        "alpine",
+						},
+					},
+					Ingresses: []*models.Ingress{
+						{
+							Host: "app1.mc.int",
+							Paths: []*models.IngressPath{
+								{
+									Path:     "/",
+									PortName: "http",
+								},
+							},
+						},
+					},
 				},
 			},
 		},

@@ -29,7 +29,7 @@ func TestClone(t *testing.T) {
 	repo := git.NewRepo(testRepo, "deploy", "HEAD", &git.RepoCreds{
 		username,
 		password,
-	})
+	}, false)
 
 	err := repo.Clone()
 	if err != nil {

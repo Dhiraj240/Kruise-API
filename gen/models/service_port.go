@@ -34,8 +34,7 @@ type ServicePort struct {
 	Protocol string `json:"protocol,omitempty"`
 
 	// Number or name of the port to access on the pods targeted by the service
-	// Min Length: 1
-	TargetPort string `json:"targetPort,omitempty"`
+	TargetPort int64 `json:"targetPort,omitempty"`
 }
 
 // Validate validates this service port
@@ -51,10 +50,6 @@ func (m *ServicePort) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateProtocol(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTargetPort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -127,19 +122,6 @@ func (m *ServicePort) validateProtocol(formats strfmt.Registry) error {
 
 	// value enum
 	if err := m.validateProtocolEnum("protocol", "body", m.Protocol); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ServicePort) validateTargetPort(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.TargetPort) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("targetPort", "body", string(m.TargetPort), 1); err != nil {
 		return err
 	}
 

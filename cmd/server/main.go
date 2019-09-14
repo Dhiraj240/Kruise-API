@@ -17,6 +17,7 @@ import (
 	"deploy-wizard/pkg/application"
 	"deploy-wizard/pkg/git"
 	"deploy-wizard/pkg/metrics"
+
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -125,7 +126,7 @@ func main() {
 				return apps.NewPreviewAppDefault(500).WithPayload(errResp)
 			}
 
-			metrics.AppsRenderedCount.WithLabelValues(app.Name).Inc()
+			metrics.AppsRenderedCount.WithLabelValues(app.Metadata.Name).Inc()
 			return apps.NewPreviewAppCreated().WithPayload(rendered)
 		})
 
@@ -152,10 +153,14 @@ func main() {
 				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
 			}
 
-			repo := git.NewRepo(app.RepoURL.String(), app.Path, app.TargetRevision, &git.RepoCreds{
-				Username: stashUser,
-				Password: stashPassword,
-			}, gitInsecureSkipVerify)
+			repo := git.NewRepo(
+				app.Spec.Destination.URL.String(),
+				app.Spec.Destination.Path,
+				app.Spec.Destination.TargetRevision,
+				&git.RepoCreds{
+					Username: stashUser,
+					Password: stashPassword,
+				}, gitInsecureSkipVerify)
 
 			err = repo.Clone()
 			if err != nil {
@@ -168,7 +173,11 @@ func main() {
 				repo.AddFile(filename, content)
 			}
 
-			err = repo.Commit(fmt.Sprintf("kruise release for %s:%s", app.Name, app.Release))
+			err = repo.Commit(
+				fmt.Sprintf("kruise release for %s:%s",
+					app.Metadata.Name,
+					app.Metadata.Labels.Version,
+				))
 			if err != nil {
 				errResp := &models.Error{Code: codeRepoCommitError, Message: err.Error()}
 				return apps.NewReleaseAppDefault(500).WithPayload(errResp)

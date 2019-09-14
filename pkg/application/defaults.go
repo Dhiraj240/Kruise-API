@@ -11,15 +11,16 @@ const (
 
 // ApplyDefaults applies defaults to the Application model
 func ApplyDefaults(app *models.Application) *models.Application {
-	if app.TargetRevision == "" {
-		app.TargetRevision = defaultApplicationTargetRevision
+	destination := app.Spec.Destination
+	if destination.TargetRevision == "" {
+		destination.TargetRevision = defaultApplicationTargetRevision
 	}
-	if app.Path == "" {
-		app.Path = defaultApplicationPath
+	if destination.Path == "" {
+		destination.Path = defaultApplicationPath
 	}
 
-	for _, service := range app.Services {
-		applyServiceDefaults(service)
+	for _, component := range app.Spec.Components {
+		applyServiceDefaults(component.Service)
 	}
 
 	return app

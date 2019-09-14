@@ -303,9 +303,8 @@ definitions:
           - TCP
           - UDP
       targetPort:
-        type: string
+        type: integer
         description: Number or name of the port to access on the pods targeted by the service
-        minLength: 1
         x-nullable: false
     required:
       - name

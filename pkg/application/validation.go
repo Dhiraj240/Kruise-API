@@ -13,6 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TODO: validate integers are not 0 (port, targetPort, capacity)
+
 const (
 	errMsgInvalidJSON      = "invalid json payload"
 	errMsgNotAnApplication = "not an application object"
@@ -33,7 +35,6 @@ func ValidateApplication(appdata interface{}) map[string]interface{} {
 		log.WithField("f", "application.ValidateApplication").WithError(err).Warnf(errMsgInvalidJSON)
 		errors[""] = errMsgInvalidJSON
 		return errors
-
 	}
 
 	var app *models.Application
@@ -44,72 +45,144 @@ func ValidateApplication(appdata interface{}) map[string]interface{} {
 		return errors
 	}
 
-	if app.Name == "" {
-		errors["name"] = newRequiredValidationError("name")
+	if app.Metadata == nil {
+		errors[""] = newRequiredValidationError("metadata")
+		return errors
 	}
 
-	if app.Release == "" {
-		errors["release"] = newRequiredValidationError("release")
+	if app.Spec == nil {
+		errors[""] = newRequiredValidationError("spec")
+		return errors
 	}
 
-	if app.Environment == "" {
-		errors["environment"] = newRequiredValidationError("environment")
+	mdErrors := ValidateMetadata(app.Metadata)
+	if len(mdErrors) > 0 {
+		errors["metadata"] = mdErrors
 	}
 
-	if app.Tenant == "" {
-		errors["tenant"] = newRequiredValidationError("tenant")
-	}
-
-	if app.Namespace == "" {
-		errors["namespace"] = newRequiredValidationError("namespace")
-	}
-
-	if app.Path == "" {
-		errors["path"] = newRequiredValidationError("path")
-	}
-
-	if app.Region == "" {
-		errors["region"] = newRequiredValidationError("region")
-	}
-
-	if app.RepoURL == "" {
-		errors["repoURL"] = newRequiredValidationError("repoURL")
-	}
-
-	if app.TargetRevision == "" {
-		errors["targetRevision"] = newRequiredValidationError("targetRevision")
-	}
-
-	if len(app.Services) > 0 {
-		servicesErrors := ValidateServices(app.Services)
-		if len(servicesErrors) > 0 {
-			errors["services"] = servicesErrors
-		}
-	}
-
-	if app.Ingress != nil {
-		ingressErrors := ValidateIngress(app.Ingress, app.Services)
-		if len(ingressErrors) > 0 {
-			errors["ingress"] = ingressErrors
-		}
+	specErrors := ValidateSpec(app.Spec)
+	if len(specErrors) > 0 {
+		errors["spec"] = specErrors
 	}
 
 	return errors
 }
 
-// ValidateServices returns of map with key = field and value = error
-func ValidateServices(services []*models.Service) map[string]interface{} {
+// ValidateMetadata returns of map with key = field and value = error
+func ValidateMetadata(md *models.Metadata) map[string]interface{} {
 	errors := map[string]interface{}{}
-
-	for i, svc := range services {
-		svcErrors := ValidateService(svc)
-		idx := strconv.Itoa(i)
-
-		if len(svcErrors) > 0 {
-			errors[idx] = svcErrors
-		}
+	if md.Name == "" {
+		errors["name"] = newRequiredValidationError("name")
 	}
 
+	if md.Namespace == "" {
+		errors["namespace"] = newRequiredValidationError("namespace")
+	}
+
+	lblErrors := ValidateLabels(md.Labels)
+	if len(lblErrors) > 0 {
+		errors["labels"] = lblErrors
+	}
+
+	return errors
+}
+
+// ValidateLabels returns of map with key = field and value = error
+func ValidateLabels(labels *models.Labels) map[string]interface{} {
+	errors := map[string]interface{}{}
+	if labels.Env == "" {
+		errors["environment"] = newRequiredValidationError("environment")
+	}
+
+	if labels.Team == "" {
+		errors["tenant"] = newRequiredValidationError("tenant")
+	}
+
+	if labels.Version == "" {
+		errors["version"] = newRequiredValidationError("version")
+	}
+
+	if labels.Region == "" {
+		errors["region"] = newRequiredValidationError("region")
+	}
+
+	return errors
+}
+
+// ValidateDestination returns of map with key = field and value = error
+func ValidateDestination(dest *models.Destination) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if dest.URL == "" {
+		errors["url"] = newRequiredValidationError("url")
+	}
+
+	if dest.Path == "" {
+		errors["path"] = newRequiredValidationError("path")
+	}
+
+	if dest.TargetRevision == "" {
+		errors["targetRevision"] = newRequiredValidationError("targetRevision")
+	}
+
+	return errors
+}
+
+// ValidateSpec returns of map with key = field and value = error
+func ValidateSpec(spec *models.Spec) map[string]interface{} {
+	errors := map[string]interface{}{}
+	if spec.Destination == nil {
+		errors["destination"] = newRequiredValidationError("destination")
+		return errors
+	}
+	if verrs := ValidateDestination(spec.Destination); len(verrs) > 0 {
+		errors["destination"] = verrs
+	}
+
+	if len(spec.Components) == 0 {
+		errors["components"] = newRequiredValidationError("components")
+		return errors
+	}
+
+	if verrs := ValidateComponents(spec.Components); len(verrs) > 0 {
+		errors["components"] = verrs
+	}
+
+	// TODO: ConfigMaps
+	// TODO: PersistentVolumes
+
+	return errors
+}
+
+// ValidateComponent returns of map with key = field and value = error
+func ValidateComponent(component *models.Component) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if verrs := ValidateService(component.Service); len(verrs) > 0 {
+		errors["service"] = verrs
+	}
+
+	if verrs := ValidateIngresses(component.Ingresses); len(verrs) > 0 {
+		errors["ingresses"] = verrs
+	}
+
+	if verrs := ValidateContainers(component.Containers); len(verrs) > 0 {
+		errors["containers"] = verrs
+	}
+
+	return errors
+}
+
+// ValidateComponents returns of map with key = field and value = error
+func ValidateComponents(components []*models.Component) map[string]interface{} {
+	errors := map[string]interface{}{}
+	for i, comp := range components {
+		errs := ValidateComponent(comp)
+		idx := strconv.Itoa(i)
+		if len(errs) > 0 {
+			errors[idx] = errs
+		}
+	}
 	return errors
 }
 
@@ -133,11 +206,6 @@ func ValidateService(svc *models.Service) map[string]interface{} {
 	portsErrors := ValidateServicePorts(svc.Ports)
 	if len(portsErrors) > 0 {
 		errors["ports"] = portsErrors
-	}
-
-	containerErrors := ValidateContainers(svc.Containers)
-	if len(containerErrors) > 0 {
-		errors["containers"] = containerErrors
 	}
 
 	return errors
@@ -174,8 +242,8 @@ func ValidateContainer(container *models.Container) map[string]interface{} {
 		errors["imageTag"] = newRequiredValidationError("imageTag")
 	}
 
-	if len(container.Ports) == 0 {
-		errors["ports"] = newRequiredValidationError("ports")
+	if len(container.PortNames) == 0 {
+		errors["portNames"] = newRequiredValidationError("portNames")
 	}
 
 	return errors
@@ -205,87 +273,71 @@ func ValidateServicePort(port *models.ServicePort) map[string]interface{} {
 	}
 
 	if port.Port == 0 {
-		errors["port"] = newRequiredValidationError("port")
+		errors["port"] = fmt.Sprintf("%d is not a valid port number", port.Port)
 	}
 
 	return errors
 }
 
 // ValidateIngress returns of map with key = field and value = error
-func ValidateIngress(ingress *models.Ingress, services []*models.Service) map[string]interface{} {
+func ValidateIngresses(ingresses []*models.Ingress) map[string]interface{} {
+	errors := map[string]interface{}{}
+	for i, ingress := range ingresses {
+		if verrs := ValidateIngress(ingress); len(verrs) > 0 {
+			errors[strconv.Itoa(i)] = verrs
+		}
+	}
+	return errors
+}
+
+// ValidateIngress returns of map with key = field and value = error
+func ValidateIngress(ingress *models.Ingress) map[string]interface{} {
 	errors := map[string]interface{}{}
 
-	if ingress.Name == "" {
-		errors["name"] = newRequiredValidationError("name")
+	if ingress.Host == "" {
+		errors["host"] = newRequiredValidationError("host")
 	}
 
-	rulesErrors := ValidateIngressRules(ingress.Rules, services)
-	if len(rulesErrors) > 0 {
-		errors["rules"] = rulesErrors
+	if !isValidDNSName(ingress.Host) {
+		errors["host"] = fmt.Sprintf("%q must be a valid host name", ingress.Host)
+	}
+
+	if verrs := ValidateIngressPaths(ingress.Paths); len(verrs) > 0 {
+		errors["paths"] = verrs
 	}
 
 	return errors
 }
 
-// ValidateIngressRules returns of map with key = field and value = error
-func ValidateIngressRules(ingressRules []*models.IngressRule, services []*models.Service) map[string]interface{} {
+// ValidateIngressPaths returns of map with key = field and value = error
+func ValidateIngressPaths(ingressPaths []*models.IngressPath) map[string]interface{} {
 	errors := map[string]interface{}{}
 
-	for i, ingressRule := range ingressRules {
-		ruleErrors := ValidateIngressRule(ingressRule, services)
+	for i, ingressPath := range ingressPaths {
+		pathErrors := ValidateIngressPath(ingressPath)
 		idx := strconv.Itoa(i)
 
-		if len(ruleErrors) > 0 {
-			errors[idx] = ruleErrors
+		if len(pathErrors) > 0 {
+			errors[idx] = pathErrors
 		}
 	}
 
 	return errors
 }
 
-// ValidateIngressRule returns of map with key = field and value = error
-func ValidateIngressRule(ingressRule *models.IngressRule, services []*models.Service) map[string]interface{} {
+// ValidateIngressPath returns of map with key = field and value = error
+func ValidateIngressPath(ingressPath *models.IngressPath) map[string]interface{} {
 	errors := map[string]interface{}{}
 
-	if ingressRule.Host == "" {
-		errors["host"] = newRequiredValidationError("host")
-	} else if !isValidDNSName(ingressRule.Host) {
-		errors["host"] = fmt.Sprintf("%q must be a valid host name", ingressRule.Host)
+	if ingressPath.Path == "" {
+		errors["path"] = newRequiredValidationError("path")
 	}
 
-	var backendService *models.Service
-
-	if ingressRule.ServiceName == "" {
-		errors["serviceName"] = newRequiredValidationError("serviceName")
-	} else {
-		for _, service := range services {
-			if service.Name == ingressRule.ServiceName {
-				backendService = service
-				break
-			}
-		}
-		if backendService == nil {
-			errors["serviceName"] = fmt.Sprintf("%q does not match an exisiting service", ingressRule.ServiceName)
-		}
+	if ingressPath.PortName == "" {
+		errors["portName"] = newRequiredValidationError("portName")
 	}
 
-	if ingressRule.ServicePort == "" {
-		errors["servicePort"] = newRequiredValidationError("servicePort")
-	} else {
-		if backendService != nil {
-			var validPort bool
-			for _, port := range backendService.Ports {
-				if port.Name == ingressRule.ServicePort {
-					validPort = true
-					break
-				}
-			}
-
-			if !validPort {
-				errors["servicePort"] = fmt.Sprintf("%q does not match a service port for %q", ingressRule.ServicePort, backendService.Name)
-			}
-		}
-	}
+	// TODO: portName matches one of service port names
 
 	return errors
 }
