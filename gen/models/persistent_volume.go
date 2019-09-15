@@ -27,7 +27,7 @@ type PersistentVolume struct {
 
 	// The desired size of the volume in GB
 	// Required: true
-	Capacity *int64 `json:"capacity"`
+	Capacity int64 `json:"capacity"`
 
 	// The name of the volume
 	// Required: true
@@ -119,7 +119,7 @@ func (m *PersistentVolume) validateAccessMode(formats strfmt.Registry) error {
 
 func (m *PersistentVolume) validateCapacity(formats strfmt.Registry) error {
 
-	if err := validate.Required("capacity", "body", m.Capacity); err != nil {
+	if err := validate.Required("capacity", "body", int64(m.Capacity)); err != nil {
 		return err
 	}
 

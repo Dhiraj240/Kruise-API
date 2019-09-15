@@ -49,7 +49,7 @@ var (
 							{
 								Name:       "metrics",
 								Port:       8081,
-								TargetPort: "8090",
+								TargetPort: 8090,
 								Protocol:   "TCP",
 							},
 						},

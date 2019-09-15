@@ -148,8 +148,76 @@ func ValidateSpec(spec *models.Spec) map[string]interface{} {
 		errors["components"] = verrs
 	}
 
-	// TODO: ConfigMaps
-	// TODO: PersistentVolumes
+	if verrs := ValidateConfigMaps(spec.ConfigMaps); len(verrs) > 0 {
+		errors["configMaps"] = verrs
+	}
+	if verrs := ValidatePersistentVolumes(spec.PersistentVolumes); len(verrs) > 0 {
+		errors["persistentVolumes"] = verrs
+	}
+
+	return errors
+}
+
+// ValidateConfigMaps returns of map with key = field and value = error
+func ValidateConfigMaps(configMaps []*models.ConfigMap) map[string]interface{} {
+	errors := map[string]interface{}{}
+	for i, comp := range configMaps {
+		errs := ValidateConfigMap(comp)
+		idx := strconv.Itoa(i)
+		if len(errs) > 0 {
+			errors[idx] = errs
+		}
+	}
+	return errors
+}
+
+// ValidateConfigMap returns of map with key = field and value = error
+func ValidateConfigMap(configMap *models.ConfigMap) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if configMap.Name == "" {
+		errors["name"] = newRequiredValidationError("name")
+	}
+
+	if configMap.Data == "" {
+		errors["data"] = newRequiredValidationError("data")
+	}
+
+	return errors
+}
+
+// ValidatePersistentVolumes returns of map with key = field and value = error
+func ValidatePersistentVolumes(persistentVolumes []*models.PersistentVolume) map[string]interface{} {
+	errors := map[string]interface{}{}
+	for i, comp := range persistentVolumes {
+		errs := ValidatePersistentVolume(comp)
+		idx := strconv.Itoa(i)
+		if len(errs) > 0 {
+			errors[idx] = errs
+		}
+	}
+	return errors
+}
+
+// ValidatePersistentVolume returns of map with key = field and value = error
+func ValidatePersistentVolume(persistentVolume *models.PersistentVolume) map[string]interface{} {
+	errors := map[string]interface{}{}
+
+	if persistentVolume.Name == "" {
+		errors["name"] = newRequiredValidationError("name")
+	}
+
+	if persistentVolume.AccessMode == "" {
+		errors["accessMode"] = newRequiredValidationError("accessMode")
+	}
+
+	if persistentVolume.Capacity <= 0 {
+		errors["capacity"] = "capacity must be greater than 0"
+	}
+
+	if persistentVolume.StorageClassName == "" {
+		errors["storageClassName"] = newRequiredValidationError("storageClassName")
+	}
 
 	return errors
 }
@@ -246,6 +314,38 @@ func ValidateContainer(container *models.Container) map[string]interface{} {
 		errors["portNames"] = newRequiredValidationError("portNames")
 	}
 
+	if len(container.Volumes) > 0 {
+		if verrs := ValidateVolumeMounts(container.Volumes); len(verrs) > 0 {
+			errors["volumes"] = verrs
+		}
+	}
+
+	return errors
+}
+
+// ValidateVolumeMounts returns of map with key = field and value = error
+func ValidateVolumeMounts(mounts []*models.VolumeMount) map[string]interface{} {
+	errors := map[string]interface{}{}
+	for i, vm := range mounts {
+		if verrs := ValidateVolumeMount(vm); len(verrs) > 0 {
+			errors[strconv.Itoa(i)] = verrs
+		}
+	}
+	return errors
+}
+
+// ValidateVolumeMount returns of map with key = field and value = error
+func ValidateVolumeMount(mount *models.VolumeMount) map[string]interface{} {
+	errors := map[string]interface{}{}
+	if mount.Name == "" {
+		errors["name"] = newRequiredValidationError("name")
+	}
+	if mount.Type == "" {
+		errors["type"] = newRequiredValidationError("type")
+	}
+	if mount.MountPath == "" {
+		errors["mountPath"] = newRequiredValidationError("mountPath")
+	}
 	return errors
 }
 

@@ -476,7 +476,8 @@ func init() {
         "capacity": {
           "description": "The desired size of the volume in GB",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-nullable": false
         },
         "name": {
           "description": "The name of the volume",
@@ -1136,7 +1137,8 @@ func init() {
         "capacity": {
           "description": "The desired size of the volume in GB",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-nullable": false
         },
         "name": {
           "description": "The name of the volume",
