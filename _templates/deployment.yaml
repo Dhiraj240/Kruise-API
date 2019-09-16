@@ -3,23 +3,23 @@ kind: Deployment
 metadata:
   name: {{.Service.Name}}
   labels:
-    app: {{.App.Name}}
+    app: {{.App.Metadata.Name}}
     component: {{.Service.Name}}
-    release: {{.App.Release}}
+    release: {{.App.Metadata.Labels.Version}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{.App.Name}}
+      app: {{.App.Metadata.Name}}
       component: {{.Service.Name}}
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: {{.App.Name}}
+        app: {{.App.Metadata.Name}}
         component: {{.Service.Name}}
-        release: {{.App.Release}}
+        release: {{.App.Metadata.Labels.Version}}
     spec:
       affinity:
         podAntiAffinity:
@@ -27,9 +27,9 @@ spec:
           - podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app: {{.App.Name}}
+                  app: {{.App.Metadata.Name}}
                   component: {{.Service.Name}}
-                  release: {{.App.Release}}
+                  release: {{.App.Metadata.Labels.Version}}
               topologyKey: kubernetes.io/hostname
             weight: 100
       volumes:
@@ -49,7 +49,7 @@ spec:
           name: ca-bundles
           readOnly: true
         ports:
-        {{- range $containerPort := .Ports }}
+        {{- range $containerPort := .PortNames }}
         {{- range $servicePort := $.Service.Ports }}
         {{- if eq $containerPort $servicePort.Name}}
         - name: {{$servicePort.Name}}

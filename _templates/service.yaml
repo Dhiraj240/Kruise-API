@@ -3,11 +3,8 @@ kind: Service
 metadata:
   labels:
     component: {{.Service.Name}}
-    app: {{.App.Name}}
-    release: {{.App.Release}}
-    {{- if  .Service.Tier}}
-    tier: {{ .Service.Tier}}
-    {{- end }}
+    app: {{.App.Metadata.Name}}
+    release: {{.App.Metadata.Labels.Version}}
   name: {{.Service.Name}}
 spec:
   ports:
@@ -20,6 +17,6 @@ spec:
     {{- end }}
   {{- end }}
   selector:
-    app: {{.App.Name}}
-    component: {{.App.Name}}
+    app: {{.App.Metadata.Name}}
+    component: {{.App.Metadata.Name}}
   type: {{.Service.Type}}

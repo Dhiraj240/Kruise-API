@@ -10,8 +10,8 @@ import (
 const testRepo = "https://github.com/ryane/sampleapp.git"
 
 const (
-	envUsernameVar = "DEPLOY_WIZARD_REPO_USERNAME"
-	envPasswordVar = "DEPLOY_WIZARD_REPO_PASSWORD"
+	envUsernameVar = "KRUISE_STASH_USERNAME"
+	envPasswordVar = "KRUISE_STASH_PASSWORD"
 )
 
 func TestClone(t *testing.T) {

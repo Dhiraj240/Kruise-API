@@ -11,11 +11,6 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-func defaultTier() *string {
-	t := "Frontend"
-	return &t
-}
-
 var (
 	validApplication = &models.Application{
 		Metadata: &models.Metadata{
@@ -60,6 +55,8 @@ var (
 							Image:           "nginx",
 							ImagePullPolicy: "IfNotPresent",
 							ImageTag:        "alpine",
+							PortNames:       []string{"http", "metrics"},
+							// TODO: Volumes
 						},
 					},
 					Ingresses: []*models.Ingress{
@@ -95,7 +92,6 @@ metadata:
 		component: app1
 		app: app1
 		release: v1
-		tier: Frontend
 	name: app1
 spec:
 	ports:
