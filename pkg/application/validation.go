@@ -91,11 +91,11 @@ func ValidateMetadata(md *models.Metadata) map[string]interface{} {
 func ValidateLabels(labels *models.Labels) map[string]interface{} {
 	errors := map[string]interface{}{}
 	if labels.Env == "" {
-		errors["environment"] = newRequiredValidationError("environment")
+		errors["env"] = newRequiredValidationError("env")
 	}
 
 	if labels.Team == "" {
-		errors["tenant"] = newRequiredValidationError("tenant")
+		errors["team"] = newRequiredValidationError("team")
 	}
 
 	if labels.Version == "" {
