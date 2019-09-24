@@ -53,7 +53,6 @@ func (o *PreviewAppCreated) WriteResponse(rw http.ResponseWriter, producer runti
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}
-
 }
 
 // PreviewAppBadRequestCode is the HTTP code returned for type PreviewAppBadRequest
@@ -96,7 +95,6 @@ func (o *PreviewAppBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}
-
 }
 
 /*PreviewAppDefault Internal server error
