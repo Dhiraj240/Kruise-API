@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: {{.App.Metadata.Name}}
+    release: {{.App.Metadata.Labels.Version}}
+  name: {{.PersistentVolume.Name}}
+spec:
+  accessModes:
+  - {{.PersistentVolume.AccessMode}}
+  resources:
+    requests:
+      storage: {{.PersistentVolume.Capacity}}Gi
+  storageClassName: {{.PersistentVolume.StorageClassName}}

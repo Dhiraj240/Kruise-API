@@ -16,10 +16,12 @@ import (
 )
 
 var templates = map[string][]string{
-	"app":           {"service-account.yaml"},
-	"services":      {"service.yaml"},
-	"deployment":    {"deployment.yaml"},
-	"kustomization": {"kustomization.yaml"},
+	"app":               {"service-account.yaml"},
+	"services":          {"service.yaml"},
+	"configmaps":        {"configmap.yaml"},
+	"persistentvolumes": {"persistentvolumeclaim.yaml"},
+	"deployment":        {"deployment.yaml"},
+	"kustomization":     {"kustomization.yaml"},
 }
 
 var errTemplateUnreadableFormat = "the %q template must exist and be readable"
@@ -86,6 +88,22 @@ func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, 
 		manifests[filename] = content
 	}
 
+	configMapResults, err := r.renderConfigMaps(app)
+	if err != nil {
+		return manifests, err
+	}
+	for filename, content := range configMapResults {
+		manifests[filename] = content
+	}
+
+	persistentVolumeResults, err := r.renderPersistentVolumes(app)
+	if err != nil {
+		return manifests, err
+	}
+	for filename, content := range persistentVolumeResults {
+		manifests[filename] = content
+	}
+
 	deploymentResults, err := r.renderDeployments(app)
 	if err != nil {
 		return manifests, err
@@ -123,6 +141,12 @@ func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 		results = append(results, manifests[serviceName(component.Service)])
 		results = append(results, manifests[deploymentName(component.Service)])
 	}
+	for _, configMap := range app.Spec.ConfigMaps {
+		results = append(results, manifests[configMapName(configMap)])
+	}
+	for _, persistentVolume := range app.Spec.PersistentVolumes {
+		results = append(results, manifests[persistentVolumeName(persistentVolume)])
+	}
 
 	return strings.Join(results, "\n\n---\n"), nil
 }
@@ -156,14 +180,95 @@ func (r *Renderer) renderServices(app *models.Application) (map[string]string, e
 	return manifests, nil
 }
 
+func (r *Renderer) renderConfigMaps(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
+
+	data := struct {
+		App       *models.Application
+		ConfigMap *models.ConfigMap
+	}{App: app}
+
+	for _, tmpl := range templates["configmaps"] {
+		templateFile, err := templateFile(r.templateDir, tmpl)
+		if err != nil {
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
+		}
+
+		for _, configMap := range app.Spec.ConfigMaps {
+			log.Infof("rendering %q", templateFile)
+			data.ConfigMap = configMap
+			result, err := renderTemplate(templateFile, data)
+			if err != nil {
+				return manifests, err
+			}
+			manifests[configMapName(configMap)] = result
+		}
+	}
+
+	return manifests, nil
+}
+
+func (r *Renderer) renderPersistentVolumes(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
+
+	data := struct {
+		App              *models.Application
+		PersistentVolume *models.PersistentVolume
+	}{App: app}
+
+	for _, tmpl := range templates["persistentvolumes"] {
+		templateFile, err := templateFile(r.templateDir, tmpl)
+		if err != nil {
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
+		}
+
+		for _, persistentVolume := range app.Spec.PersistentVolumes {
+			log.Infof("rendering %q", templateFile)
+			data.PersistentVolume = persistentVolume
+			result, err := renderTemplate(templateFile, data)
+			if err != nil {
+				return manifests, err
+			}
+			manifests[persistentVolumeName(persistentVolume)] = result
+		}
+	}
+
+	return manifests, nil
+}
+
 func (r *Renderer) renderDeployments(app *models.Application) (map[string]string, error) {
 	manifests := map[string]string{}
 
 	data := struct {
-		App        *models.Application
-		Service    *models.Service
-		Containers []*models.Container
-	}{App: app}
+		App                   *models.Application
+		Service               *models.Service
+		ConfigMapNames        []string
+		PersistentVolumeNames []string
+		Containers            []*models.Container
+	}{
+		App: app,
+	}
+
+	// collect all mounted volumes first
+	cms := map[string]struct{}{}
+	pvs := map[string]struct{}{}
+	for _, component := range app.Spec.Components {
+		for _, container := range component.Containers {
+			for _, vol := range container.Volumes {
+				switch vol.Type {
+				case models.VolumeMountTypeConfigMap:
+					cms[vol.Name] = struct{}{}
+					break
+				case models.VolumeMountTypePersistentVolume:
+					pvs[vol.Name] = struct{}{}
+					break
+				default:
+				}
+			}
+		}
+	}
+	data.ConfigMapNames = mapKeys(cms)
+	data.PersistentVolumeNames = mapKeys(pvs)
 
 	for _, tmpl := range templates["deployment"] {
 		templateFile, err := templateFile(r.templateDir, tmpl)
@@ -223,4 +328,22 @@ func serviceName(s *models.Service) string {
 
 func deploymentName(s *models.Service) string {
 	return fmt.Sprintf("deployment-%s.yaml", s.Name)
+}
+
+func configMapName(cm *models.ConfigMap) string {
+	return fmt.Sprintf("configmap-%s.yaml", cm.Name)
+}
+
+func persistentVolumeName(pv *models.PersistentVolume) string {
+	return fmt.Sprintf("persistent-volume-%s.yaml", pv.Name)
+}
+
+func mapKeys(m map[string]struct{}) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	return keys
 }

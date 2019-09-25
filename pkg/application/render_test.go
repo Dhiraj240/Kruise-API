@@ -29,8 +29,20 @@ var (
 				Path:           "/",
 				TargetRevision: "HEAD",
 			},
-			ConfigMaps:        []*models.ConfigMap{},
-			PersistentVolumes: []*models.PersistentVolume{},
+			ConfigMaps: []*models.ConfigMap{
+				{
+					Name: "config",
+					Data: "debug: true",
+				},
+			},
+			PersistentVolumes: []*models.PersistentVolume{
+				{
+					Name:             "data",
+					Capacity:         20,
+					AccessMode:       models.PersistentVolumeAccessModeReadWriteOnce,
+					StorageClassName: "SSD",
+				},
+			},
 			Components: []*models.Component{
 				{
 					Service: &models.Service{
@@ -56,7 +68,20 @@ var (
 							ImagePullPolicy: "IfNotPresent",
 							ImageTag:        "alpine",
 							PortNames:       []string{"http", "metrics"},
-							// TODO: Volumes
+							Volumes: []*models.VolumeMount{
+								{
+									MountPath: "/config",
+									Name:      "config",
+									ReadOnly:  true,
+									Type:      "ConfigMap",
+								},
+								{
+									MountPath: "/data",
+									Name:      "data",
+									ReadOnly:  false,
+									Type:      "PersistentVolume",
+								},
+							},
 						},
 					},
 					Ingresses: []*models.Ingress{
@@ -147,14 +172,26 @@ spec:
 			- name: ca-bundles
 				configMap:
 					name: ca-bundles
+			- name: config
+				configMap:
+					name: config
+			- name: data
+				persistentVolumeClaim:
+					claimName: data
 			containers:
 			- name: app1
 				image: nginx:alpine
 				imagePullPolicy: IfNotPresent
 				volumeMounts:
-				- mountPath: "/etc/ssl/certs"
+				- mountPath: /etc/ssl/certs
 					name: ca-bundles
 					readOnly: true
+				- mountPath: /config
+					name: config
+					readOnly: true
+				- mountPath: /data
+					name: data
+					readOnly: false
 				ports:
 				- name: http
 					containerPort: 8080
@@ -162,6 +199,35 @@ spec:
 				- name: metrics
 					containerPort: 8090
 					protocol: TCP
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+	labels:
+		app: app1
+		release: v1
+	name: config
+data: |
+	debug: true
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+	labels:
+		app: app1
+		release: v1
+	name: data
+spec:
+	accessModes:
+	- ReadWriteOnce
+	resources:
+		requests:
+			storage: 20Gi
+	storageClassName: SSD
 `
 )
 
