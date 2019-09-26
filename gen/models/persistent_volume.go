@@ -37,7 +37,6 @@ type PersistentVolume struct {
 	// The desired storage class for the volume
 	// Required: true
 	// Min Length: 1
-	// Enum: [SSD NFS]
 	StorageClassName string `json:"storageClassName"`
 }
 
@@ -139,35 +138,6 @@ func (m *PersistentVolume) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-var persistentVolumeTypeStorageClassNamePropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["SSD","NFS"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		persistentVolumeTypeStorageClassNamePropEnum = append(persistentVolumeTypeStorageClassNamePropEnum, v)
-	}
-}
-
-const (
-
-	// PersistentVolumeStorageClassNameSSD captures enum value "SSD"
-	PersistentVolumeStorageClassNameSSD string = "SSD"
-
-	// PersistentVolumeStorageClassNameNFS captures enum value "NFS"
-	PersistentVolumeStorageClassNameNFS string = "NFS"
-)
-
-// prop value enum
-func (m *PersistentVolume) validateStorageClassNameEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, persistentVolumeTypeStorageClassNamePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (m *PersistentVolume) validateStorageClassName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("storageClassName", "body", string(m.StorageClassName)); err != nil {
@@ -175,11 +145,6 @@ func (m *PersistentVolume) validateStorageClassName(formats strfmt.Registry) err
 	}
 
 	if err := validate.MinLength("storageClassName", "body", string(m.StorageClassName), 1); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := m.validateStorageClassNameEnum("storageClassName", "body", m.StorageClassName); err != nil {
 		return err
 	}
 

@@ -469,10 +469,7 @@ definitions:
         description: The desired storage class for the volume
         minLength: 1
         x-nullable: false
-        default: SSD
-        enum:
-          - SSD
-          - NFS
+        default: default
     required:
       - name
       - accessMode

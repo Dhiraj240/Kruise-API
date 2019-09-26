@@ -488,12 +488,8 @@ func init() {
         "storageClassName": {
           "description": "The desired storage class for the volume",
           "type": "string",
-          "default": "SSD",
+          "default": "default",
           "minLength": 1,
-          "enum": [
-            "SSD",
-            "NFS"
-          ],
           "x-nullable": false
         }
       }
@@ -1149,12 +1145,8 @@ func init() {
         "storageClassName": {
           "description": "The desired storage class for the volume",
           "type": "string",
-          "default": "SSD",
+          "default": "default",
           "minLength": 1,
-          "enum": [
-            "SSD",
-            "NFS"
-          ],
           "x-nullable": false
         }
       }
