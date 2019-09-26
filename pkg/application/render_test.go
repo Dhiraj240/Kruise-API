@@ -209,8 +209,9 @@ metadata:
 		app: app1
 		release: v1
 	name: config
-data: |
-	debug: true
+data:
+	data: |
+		debug: true
 
 
 ---

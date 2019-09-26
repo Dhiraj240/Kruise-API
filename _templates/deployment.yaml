@@ -63,7 +63,7 @@ spec:
           name: {{.Name}}
           readOnly: {{.ReadOnly}}
           {{- if .SubPath }}
-          subPath: [{{.SubPath}}]
+          subPath: {{.SubPath}}
           {{- end }}
         {{- end}}
         ports:
