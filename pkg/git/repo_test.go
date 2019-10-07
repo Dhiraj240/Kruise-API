@@ -7,23 +7,25 @@ import (
 	"deploy-wizard/pkg/git"
 )
 
-const testRepo = "https://github.com/ryane/sampleapp.git"
-
 const (
-	envUsernameVar = "KRUISE_STASH_USERNAME"
-	envPasswordVar = "KRUISE_STASH_PASSWORD"
+	envRepoURLVar  = "KRUISE_GIT_REPO"
+	envUsernameVar = "KRUISE_GIT_USERNAME"
+	envPasswordVar = "KRUISE_GIT_PASSWORD"
 )
 
 func TestClone(t *testing.T) {
+	configMissingMessage := "skipping repo tests because KRUISE_GIT_* variables are not set. Configure KRUISE_GIT_REPO, KRUISE_GIT_USERNAME, and KRUISE_GIT_PASSWORD"
+	testRepo := os.Getenv(envRepoURLVar)
+	if testRepo == "" {
+		t.Skip(configMissingMessage)
+	}
 	username := os.Getenv(envUsernameVar)
 	if username == "" {
-		t.Errorf("set a valid username for the test repo in a an environment variable called %s", envUsernameVar)
-		t.FailNow()
+		t.Skip(configMissingMessage)
 	}
 	password := os.Getenv(envPasswordVar)
 	if password == "" {
-		t.Errorf("set a valid password for the test repo in a an environment variable called %s", envPasswordVar)
-		t.FailNow()
+		t.Skip(configMissingMessage)
 	}
 
 	repo := git.NewRepo(testRepo, "deploy", "HEAD", &git.RepoCreds{
