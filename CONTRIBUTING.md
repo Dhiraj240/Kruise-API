@@ -11,19 +11,40 @@ Fork, then clone the repo:
 
 Set up your machine:
 
-    please add what needs to be done here
+* Golang (1.13+)
+* [go-swagger](https://github.com/go-swagger/go-swagger) with the `swagger`
+  binary avallable in your PATH.
 
 Build the code:
-  
-   make
+
+```
+make build
+```
+
+If you make any changes to the [swagger specification](./swagger.yaml), you
+will need to run the code generation:
+
+```
+make gen
+```
 
 Make sure the tests pass:
 
-    ????
+```
+make test
+```
 
 Make your change. Add tests for your change. Make the tests pass:
 
-    ????
+```
+make test
+```
+
+You can run the server locally with:
+
+```
+make run
+```
 
 Push to your fork and [submit a pull request][pr].
 
