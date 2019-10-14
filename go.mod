@@ -40,3 +40,5 @@ require (
 	gopkg.in/src-d/go-git-fixtures.v3 v3.5.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.11.0
 )
+
+go 1.13

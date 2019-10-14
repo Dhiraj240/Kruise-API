@@ -25,8 +25,8 @@ import (
 )
 
 const (
-	envUsernameVar      = "KRUISE_STASH_USERNAME"
-	envPasswordVar      = "KRUISE_STASH_PASSWORD"
+	envUsernameVar      = "KRUISE_GIT_USERNAME"
+	envPasswordVar      = "KRUISE_GIT_PASSWORD"
 	codeRenderError     = 101
 	codeRepoCloneError  = 301
 	codeRepoCommitError = 302
