@@ -25,7 +25,7 @@ var (
 		},
 		Spec: &models.Spec{
 			Destination: &models.Destination{
-				URL:            strfmt.URI("https://fusion.mastercard.int/stash/scm/ce/fake-repo.git/"),
+				URL:            strfmt.URI("https://internalscm/stash/scm/ce/fake-repo.git/"),
 				Path:           "/",
 				TargetRevision: "HEAD",
 			},
@@ -169,9 +169,6 @@ spec:
 							topologyKey: kubernetes.io/hostname
 						weight: 100
 			volumes:
-			- name: ca-bundles
-				configMap:
-					name: ca-bundles
 			- name: config
 				configMap:
 					name: config

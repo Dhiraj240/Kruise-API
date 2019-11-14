@@ -127,6 +127,17 @@ func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, 
 	return manifests, nil
 }
 
+// RenderDeploySpec renders and argocd deployment spec
+func (r *Renderer) RenderDeploySpec(app *models.Application) (string, error) {
+	templateFile, err := templateFile(r.templateDir, "argocd-application.yaml")
+	if err != nil {
+		return "", errors.Wrapf(err, errTemplateUnreadableFormat)
+	}
+
+	log.Infof("rendering %q", templateFile)
+	return renderTemplate(templateFile, app)
+}
+
 // RenderApplication renders an application to Kubernetes manifests
 func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 	var results []string

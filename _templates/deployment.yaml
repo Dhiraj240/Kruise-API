@@ -33,9 +33,6 @@ spec:
               topologyKey: kubernetes.io/hostname
             weight: 100
       volumes:
-      - name: ca-bundles
-        configMap:
-          name: ca-bundles
       {{- range .ConfigMapNames }}
       - name: {{.}}
         configMap:
@@ -55,9 +52,6 @@ spec:
         command: [{{.Command}}]
         {{- end }}
         volumeMounts:
-        - mountPath: /etc/ssl/certs
-          name: ca-bundles
-          readOnly: true
         {{- range .Volumes }}
         - mountPath: {{.MountPath}}
           name: {{.Name}}
