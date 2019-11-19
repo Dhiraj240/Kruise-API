@@ -3,7 +3,7 @@ GIT_SHA    = $(shell git rev-parse --short HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 GIT_DIRTY  = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
 
-IMAGE_REPO = artifacts.mastercard.int/docker-internal-unstable/mc-docker-pipeline/kubernetes
+IMAGE_REPO = ryane
 
 ifdef VERSION
 	DOCKER_VERSION = $(VERSION)
@@ -51,7 +51,7 @@ test:
 
 .PHONY: docker
 docker:
-	docker build --force-rm --build-arg VERSION=${DOCKER_VERSION} -t ${IMAGE_REPO}/deploy-wizard:${DOCKER_VERSION} -f ./Dockerfile .
+	docker build --force-rm --build-arg VERSION=${DOCKER_VERSION} -t ${IMAGE_REPO}/kruise-api:${DOCKER_VERSION} -f ./Dockerfile .
 
 docker.push: docker
-	docker push ${IMAGE_REPO}/deploy-wizard:${DOCKER_VERSION}
+	docker push ${IMAGE_REPO}/kruise-api:${DOCKER_VERSION}

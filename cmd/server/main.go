@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"deploy-wizard/gen/models"
 	"deploy-wizard/gen/restapi"
@@ -25,12 +26,13 @@ import (
 )
 
 const (
-	envUsernameVar      = "KRUISE_GIT_USERNAME"
-	envPasswordVar      = "KRUISE_GIT_PASSWORD"
-	codeRenderError     = 101
-	codeRepoCloneError  = 301
-	codeRepoCommitError = 302
-	codeRepoPushError   = 303
+	envUsernameVar            = "KRUISE_GIT_USERNAME"
+	envPasswordVar            = "KRUISE_GIT_PASSWORD"
+	codeRenderError           = 101
+	codeDeploySpecRenderError = 102
+	codeRepoCloneError        = 301
+	codeRepoCommitError       = 302
+	codeRepoPushError         = 303
 )
 
 func main() {
@@ -153,6 +155,12 @@ func main() {
 				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
 			}
 
+			renderedDeploySpec, err := renderer.RenderDeploySpec(app)
+			if err != nil {
+				errResp := &models.Error{Code: codeDeploySpecRenderError, Message: err.Error()}
+				return apps.NewReleaseAppDefault(500).WithPayload(errResp)
+			}
+
 			repo := git.NewRepo(
 				app.Spec.Destination.URL.String(),
 				app.Spec.Destination.Path,
@@ -172,6 +180,10 @@ func main() {
 				log.Infof("adding file %q (%d bytes)", filename, len(content))
 				repo.AddFile(filename, content)
 			}
+
+			deploySpecFile := fmt.Sprintf("apps/%s.yaml", strings.ToLower(app.Metadata.Name))
+			log.Infof("adding deploy spec %q (%d bytes)", deploySpecFile, len(renderedDeploySpec))
+			repo.AddDeploySpec(deploySpecFile, renderedDeploySpec)
 
 			err = repo.Commit(
 				fmt.Sprintf("kruise release for %s:%s",

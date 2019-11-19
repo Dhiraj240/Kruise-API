@@ -18,5 +18,5 @@ spec:
   {{- end }}
   selector:
     app: {{.App.Metadata.Name}}
-    component: {{.App.Metadata.Name}}
+    component: {{.Service.Name}}
   type: {{.Service.Type}}

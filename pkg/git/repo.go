@@ -88,6 +88,43 @@ func (r *Repo) AddFile(fileName string, content string) {
 	r.files[fileName] = content
 }
 
+// AddDeploySpec adds a deploy spec to the repo
+func (r *Repo) AddDeploySpec(fileName string, content string) error {
+	if r.r == nil {
+		return ErrRepoIsNotCloned
+	}
+	wt, err := r.r.Worktree()
+	if err != nil {
+		return err
+	}
+
+	err = r.fs.MkdirAll(filepath.Dir(fileName), 0755)
+	if err != nil {
+		return err
+	}
+
+	f, err := r.fs.Create(fileName)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.WriteString(f, content)
+	if err != nil {
+		return err
+	}
+
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+
+	if _, err := wt.Add(fileName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Commit commits the current state of the repo
 func (r *Repo) Commit(msg string) error {
 	if r.r == nil {

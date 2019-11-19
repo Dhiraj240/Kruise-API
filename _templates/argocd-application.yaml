@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{.Metadata.Name}}
+  namespace: argocd
+spec:
+  destination:
+    namespace: {{.Metadata.Namespace}}
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: {{.Spec.Destination.Path}}
+    repoURL: {{.Spec.Destination.URL}}

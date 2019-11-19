@@ -21,6 +21,7 @@ var templates = map[string][]string{
 	"configmaps":        {"configmap.yaml"},
 	"persistentvolumes": {"persistentvolumeclaim.yaml"},
 	"deployment":        {"deployment.yaml"},
+	"ingresses":         {"ingress.yaml"},
 	"kustomization":     {"kustomization.yaml"},
 }
 
@@ -88,6 +89,14 @@ func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, 
 		manifests[filename] = content
 	}
 
+	ingressResults, err := r.renderIngresses(app)
+	if err != nil {
+		return manifests, err
+	}
+	for filename, content := range ingressResults {
+		manifests[filename] = content
+	}
+
 	configMapResults, err := r.renderConfigMaps(app)
 	if err != nil {
 		return manifests, err
@@ -127,6 +136,17 @@ func (r *Renderer) RenderManifests(app *models.Application) (map[string]string, 
 	return manifests, nil
 }
 
+// RenderDeploySpec renders and argocd deployment spec
+func (r *Renderer) RenderDeploySpec(app *models.Application) (string, error) {
+	templateFile, err := templateFile(r.templateDir, "argocd-application.yaml")
+	if err != nil {
+		return "", errors.Wrapf(err, errTemplateUnreadableFormat)
+	}
+
+	log.Infof("rendering %q", templateFile)
+	return renderTemplate(templateFile, app)
+}
+
 // RenderApplication renders an application to Kubernetes manifests
 func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 	var results []string
@@ -140,6 +160,9 @@ func (r *Renderer) RenderApplication(app *models.Application) (string, error) {
 	for _, component := range app.Spec.Components {
 		results = append(results, manifests[serviceName(component.Service)])
 		results = append(results, manifests[deploymentName(component.Service)])
+		for _, ingress := range component.Ingresses {
+			results = append(results, manifests[ingressName(ingress)])
+		}
 	}
 	for _, configMap := range app.Spec.ConfigMaps {
 		results = append(results, manifests[configMapName(configMap)])
@@ -175,6 +198,48 @@ func (r *Renderer) renderServices(app *models.Application) (map[string]string, e
 			}
 			manifests[serviceName(service)] = result
 		}
+	}
+
+	return manifests, nil
+}
+
+func (r *Renderer) renderIngresses(app *models.Application) (map[string]string, error) {
+	manifests := map[string]string{}
+
+	data := struct {
+		App         *models.Application
+		Ingress     *models.Ingress
+		IngressPath *models.IngressPath
+		Service     *models.Service
+	}{App: app}
+
+	log.Infof("rendering ingresses")
+
+	for _, tmpl := range templates["ingresses"] {
+		templateFile, err := templateFile(r.templateDir, tmpl)
+		if err != nil {
+			return manifests, errors.Wrapf(err, errTemplateUnreadableFormat)
+		}
+
+		for _, component := range app.Spec.Components {
+			service := component.Service
+			log.Infof("renderIngresses: service: %s", service.Name)
+			for _, ingress := range component.Ingresses {
+				log.Infof("rendering %q", templateFile)
+				data.Ingress = ingress
+				data.IngressPath = ingress.Paths[0]
+				data.Service = service
+				log.Infof("renderIngresses: data: %+v", data)
+				result, err := renderTemplate(templateFile, data)
+				if err != nil {
+					return manifests, err
+				}
+				manifests[ingressName(ingress)] = result
+			}
+		}
+	}
+	for n, c := range manifests {
+		log.Infof("renderIngresses: %s: %s", n, c)
 	}
 
 	return manifests, nil
@@ -324,6 +389,10 @@ func templateFile(templateDir, name string) (string, error) {
 
 func serviceName(s *models.Service) string {
 	return fmt.Sprintf("service-%s.yaml", s.Name)
+}
+
+func ingressName(i *models.Ingress) string {
+	return fmt.Sprintf("ingress-%s.yaml", i.Host)
 }
 
 func deploymentName(s *models.Service) string {
